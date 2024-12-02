@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+    <!-- Google Tag Manager -->
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+    })(window,document,'script','dataLayer','GTM-5VNSJFMC');</script>
+    <!-- End Google Tag Manager -->
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Find Care Jobs</title>
+    <link rel="stylesheet" href="styles.css"> <!-- Link to CSS for styling -->
+</head>
+<body>
+    <!-- Google Tag Manager (noscript) -->
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-5VNSJFMC"
+    height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+    <!-- End Google Tag Manager (noscript) -->
+    <header>
+        <!-- First row for menu links (right aligned) -->
+        <div class="header-top">
+            <nav>
+                <a href="about.html">About</a>
+                <a href="aged-care-jobs.html">Aged Care Jobs</a>
+                <a href="disability-support-jobs.html">Disability Support Jobs</a>
+                <a href="contact.html">Contact</a>
+            </nav>
+            
+        </div>
+        
+        <!-- Second row for h1 (centered) -->
+        <div class="header-middle">
+            <h1>Find Your Next Job in the Care Industry</h1>
+        </div>
+
+        <p id="job-count"></p> <!-- Job count display -->
+        
+        <!-- Search bar and button -->
+        <div class="search-bar">
+            <input type="text" id="job-title" placeholder="Enter job title or keyword">
+            <input type="text" id="location" placeholder="Enter location">
+            <button id="search-button">Search</button>
+        </div>
+        <div class="filter-section">
+            <label for="sector">Sector:</label>
+            <select id="sector">
+                <option value="">All Sectors</option>
+                <option value="Aged Care">Aged Care</option>
+                <option value="Disability Support">Disability Support</option>
+            </select>
+        </div>
+        
+        
+    </header>
+    
+    <div class="job-listings-container" id="job-listings"> <!-- This ID must match your JS code -->
+        <div class="job-cards">
+            <!-- Job cards will go here -->
+        </div>
+    </div>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script> <!-- Load PapaParse first -->
+    <script src="script.js"></script> <!-- Your custom script -->
+    <footer class="global-footer">
+        <p>&copy; 2024 Find Care Jobs. All rights reserved.</p>
+        <nav>
+            <a href="/about">About Us</a> |
+            <a href="/contact">Contact</a> |
+            <a href="/privacy">Privacy Policy</a>
+        </nav>
+    </footer>
+    
+    
+</body>
+</html>
