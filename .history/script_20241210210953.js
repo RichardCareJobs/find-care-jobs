@@ -17,8 +17,6 @@ document.addEventListener("DOMContentLoaded", function () {
             }
         });
 
-    resetSponsoredJobs(); // Clear used sponsored jobs on page load
-
     const sector = document.body.getAttribute('data-sector');
     if (sector && sector.trim()) {
         fetchSponsoredJobsBySector(sector);
@@ -27,28 +25,21 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 });
 
-let currentPage = 0; // Current page of jobs
-const jobsPerPage = 10; // Number of jobs per page
-let preRandomizedJobs = []; // Jobs randomized and ready for pagination
-let usedSponsoredJobs = []; // Track used sponsored jobs
-
-function resetSponsoredJobs() {
-    usedSponsoredJobs = [];
-}
+let currentPage = 0;
+const jobsPerPage = 10;
+let preRandomizedJobs = [];
 
 function fetchSponsoredJobsBySector(sector) {
     Papa.parse('scrape/job_listings.csv', {
         download: true,
         header: true,
         complete: function (results) {
-            const jobs = normalizeSponsoredField(results.data);
-
-            const filteredJobs = jobs
-                .filter(job => job['Sponsored'] === true && job['Sector'] === sector)
-                .sort((a, b) => new Date(b.scrapeDate) - new Date(a.scrapeDate));
-
-            preRandomizedJobs = shuffleArray(filteredJobs);
-            displayJobListings(preRandomizedJobs);
+            const jobs = results.data;
+            const filteredJobs = jobs.filter(
+                job => job['Sponsored'] === 'true' && job['Sector'] === sector
+            );
+            updateJobCount(filteredJobs.length);
+            displayJobListings(filteredJobs);
         },
         error: function (error) {
             console.error('Error fetching the CSV file:', error);
@@ -61,9 +52,8 @@ function fetchJobListings() {
         download: true,
         header: true,
         complete: function (results) {
-            const jobs = normalizeSponsoredField(results.data);
-
-            preRandomizedJobs = shuffleArray(jobs);
+            preRandomizedJobs = shuffleArray(results.data);
+            updateJobCount(preRandomizedJobs.length);
             displayJobListings(preRandomizedJobs);
         },
         error: function (error) {
@@ -72,11 +62,11 @@ function fetchJobListings() {
     });
 }
 
-function normalizeSponsoredField(jobs) {
-    return jobs.map(job => ({
-        ...job,
-        Sponsored: job['Sponsored'] ? job['Sponsored'].toString().toLowerCase() === 'true' : false
-    }));
+function updateJobCount(count) {
+    const jobCountElement = document.getElementById('job-count');
+    if (jobCountElement) {
+        jobCountElement.textContent = `Showing ${count} care industry jobs`;
+    }
 }
 
 function shuffleArray(array) {
@@ -87,24 +77,22 @@ function shuffleArray(array) {
     return array;
 }
 
-function arrangeSponsoredJobs(jobs, pageIndex, pageSize) {
-    const sponsoredJobs = jobs.filter(
-        job => job['Sponsored'] === true && !usedSponsoredJobs.includes(job['Job URL'])
-    );
-    const regularJobs = jobs.filter(job => job['Sponsored'] !== true);
+function arrangeSponsoredJobs(jobs) {
+    const sponsoredJobs = jobs.filter(job => job['Sponsored'] === 'true');
+    const regularJobs = jobs.filter(job => job['Sponsored'] !== 'true');
 
-    const arrangedJobs = [];
-    const startIndex = pageIndex * pageSize;
-    const endIndex = startIndex + pageSize;
-
-    for (let i = startIndex; i < endIndex; i++) {
-        const position = i % pageSize;
-        if ((position === 0 || position === 4) && sponsoredJobs.length > 0) {
-            const sponsoredJob = sponsoredJobs.shift();
-            arrangedJobs.push(sponsoredJob);
-            usedSponsoredJobs.push(sponsoredJob['Job URL']); // Mark as used
-        } else if (regularJobs.length > 0) {
-            arrangedJobs.push(regularJobs.shift());
+    let arrangedJobs = [];
+    for (let i = 0; i < jobsPerPage; i++) {
+        if (i === 0 || i === 4) {
+            if (sponsoredJobs.length > 0) {
+                arrangedJobs.push(sponsoredJobs.shift());
+            } else if (regularJobs.length > 0) {
+                arrangedJobs.push(regularJobs.shift());
+            }
+        } else {
+            if (regularJobs.length > 0) {
+                arrangedJobs.push(regularJobs.shift());
+            }
         }
     }
 
@@ -123,16 +111,16 @@ function displayJobListings(jobs) {
         (currentPage + 1) * jobsPerPage
     );
 
-    const arrangedJobs = arrangeSponsoredJobs(jobs, currentPage, jobsPerPage);
+    const arrangedJobs = arrangeSponsoredJobs(currentJobs);
 
     arrangedJobs.forEach(job => {
         const jobCard = document.createElement('div');
         jobCard.className = 'job-cards';
 
-        const isSponsored = job['Sponsored'] === true;
+        const sponsored = job['Sponsored'] && job['Sponsored'].toLowerCase() === 'true';
         const jobURL = job['Job URL'];
 
-        if (isSponsored) {
+        if (sponsored) {
             jobCard.classList.add('sponsored');
             jobCard.innerHTML += `<div class="badge">${job['Category'] || 'Sponsored'}</div>`;
         }
@@ -153,9 +141,7 @@ function displayJobListings(jobs) {
 }
 
 window.addEventListener('scroll', () => {
-    const { scrollTop, scrollHeight, clientHeight } = document.documentElement;
-
-    if (scrollTop + clientHeight >= scrollHeight - 50) {
+    if (window.innerHeight + window.scrollY >= document.body.offsetHeight) {
         if (currentPage * jobsPerPage < preRandomizedJobs.length) {
             displayJobListings(preRandomizedJobs);
         }

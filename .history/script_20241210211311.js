@@ -17,8 +17,6 @@ document.addEventListener("DOMContentLoaded", function () {
             }
         });
 
-    resetSponsoredJobs(); // Clear used sponsored jobs on page load
-
     const sector = document.body.getAttribute('data-sector');
     if (sector && sector.trim()) {
         fetchSponsoredJobsBySector(sector);
@@ -27,28 +25,18 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 });
 
-let currentPage = 0; // Current page of jobs
-const jobsPerPage = 10; // Number of jobs per page
-let preRandomizedJobs = []; // Jobs randomized and ready for pagination
-let usedSponsoredJobs = []; // Track used sponsored jobs
-
-function resetSponsoredJobs() {
-    usedSponsoredJobs = [];
-}
+let currentPage = 0;
+const jobsPerPage = 10;
 
 function fetchSponsoredJobsBySector(sector) {
     Papa.parse('scrape/job_listings.csv', {
         download: true,
         header: true,
         complete: function (results) {
-            const jobs = normalizeSponsoredField(results.data);
-
-            const filteredJobs = jobs
-                .filter(job => job['Sponsored'] === true && job['Sector'] === sector)
-                .sort((a, b) => new Date(b.scrapeDate) - new Date(a.scrapeDate));
-
-            preRandomizedJobs = shuffleArray(filteredJobs);
-            displayJobListings(preRandomizedJobs);
+            const jobs = results.data.filter(
+                job => job['Sponsored'] === 'true' && job['Sector'] === sector
+            );
+            displayJobListings(jobs);
         },
         error: function (error) {
             console.error('Error fetching the CSV file:', error);
@@ -61,10 +49,8 @@ function fetchJobListings() {
         download: true,
         header: true,
         complete: function (results) {
-            const jobs = normalizeSponsoredField(results.data);
-
-            preRandomizedJobs = shuffleArray(jobs);
-            displayJobListings(preRandomizedJobs);
+            const jobs = results.data;
+            displayJobListings(jobs);
         },
         error: function (error) {
             console.error('Error fetching the CSV file:', error);
@@ -79,18 +65,8 @@ function normalizeSponsoredField(jobs) {
     }));
 }
 
-function shuffleArray(array) {
-    for (let i = array.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [array[i], array[j]] = [array[j], array[i]];
-    }
-    return array;
-}
-
 function arrangeSponsoredJobs(jobs, pageIndex, pageSize) {
-    const sponsoredJobs = jobs.filter(
-        job => job['Sponsored'] === true && !usedSponsoredJobs.includes(job['Job URL'])
-    );
+    const sponsoredJobs = jobs.filter(job => job['Sponsored'] === true);
     const regularJobs = jobs.filter(job => job['Sponsored'] !== true);
 
     const arrangedJobs = [];
@@ -100,15 +76,20 @@ function arrangeSponsoredJobs(jobs, pageIndex, pageSize) {
     for (let i = startIndex; i < endIndex; i++) {
         const position = i % pageSize;
         if ((position === 0 || position === 4) && sponsoredJobs.length > 0) {
-            const sponsoredJob = sponsoredJobs.shift();
-            arrangedJobs.push(sponsoredJob);
-            usedSponsoredJobs.push(sponsoredJob['Job URL']); // Mark as used
+            arrangedJobs.push(sponsoredJobs.shift());
         } else if (regularJobs.length > 0) {
             arrangedJobs.push(regularJobs.shift());
         }
     }
 
     return arrangedJobs;
+}
+
+function debugLog(arrangedJobs, pageIndex) {
+    console.log(`Page ${pageIndex + 1} - Arranged Jobs:`);
+    arrangedJobs.forEach((job, index) => {
+        console.log(`Position ${index + 1}:`, job['Sponsored'] === true ? 'Sponsored' : 'Regular');
+    });
 }
 
 function displayJobListings(jobs) {
@@ -118,12 +99,10 @@ function displayJobListings(jobs) {
         return;
     }
 
-    const currentJobs = jobs.slice(
-        currentPage * jobsPerPage,
-        (currentPage + 1) * jobsPerPage
-    );
+    const normalizedJobs = normalizeSponsoredField(jobs);
+    const arrangedJobs = arrangeSponsoredJobs(normalizedJobs, currentPage, jobsPerPage);
 
-    const arrangedJobs = arrangeSponsoredJobs(jobs, currentPage, jobsPerPage);
+    debugLog(arrangedJobs, currentPage);
 
     arrangedJobs.forEach(job => {
         const jobCard = document.createElement('div');
@@ -153,11 +132,7 @@ function displayJobListings(jobs) {
 }
 
 window.addEventListener('scroll', () => {
-    const { scrollTop, scrollHeight, clientHeight } = document.documentElement;
-
-    if (scrollTop + clientHeight >= scrollHeight - 50) {
-        if (currentPage * jobsPerPage < preRandomizedJobs.length) {
-            displayJobListings(preRandomizedJobs);
-        }
+    if (window.innerHeight + window.scrollY >= document.body.offsetHeight) {
+        displayJobListings(preRandomizedJobs);
     }
 });

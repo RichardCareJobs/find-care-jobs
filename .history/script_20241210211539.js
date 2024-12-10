@@ -1,4 +1,5 @@
 document.addEventListener("DOMContentLoaded", function () {
+    // Load header and footer
     fetch('header.html')
         .then(response => response.text())
         .then(data => {
@@ -17,8 +18,7 @@ document.addEventListener("DOMContentLoaded", function () {
             }
         });
 
-    resetSponsoredJobs(); // Clear used sponsored jobs on page load
-
+    // Determine whether the page is sector-specific
     const sector = document.body.getAttribute('data-sector');
     if (sector && sector.trim()) {
         fetchSponsoredJobsBySector(sector);
@@ -30,12 +30,10 @@ document.addEventListener("DOMContentLoaded", function () {
 let currentPage = 0; // Current page of jobs
 const jobsPerPage = 10; // Number of jobs per page
 let preRandomizedJobs = []; // Jobs randomized and ready for pagination
-let usedSponsoredJobs = []; // Track used sponsored jobs
 
-function resetSponsoredJobs() {
-    usedSponsoredJobs = [];
-}
-
+/**
+ * Fetch and display sponsored jobs for a specific sector
+ */
 function fetchSponsoredJobsBySector(sector) {
     Papa.parse('scrape/job_listings.csv', {
         download: true,
@@ -43,11 +41,15 @@ function fetchSponsoredJobsBySector(sector) {
         complete: function (results) {
             const jobs = normalizeSponsoredField(results.data);
 
+            // Filter and sort sector-specific sponsored jobs
             const filteredJobs = jobs
                 .filter(job => job['Sponsored'] === true && job['Sector'] === sector)
                 .sort((a, b) => new Date(b.scrapeDate) - new Date(a.scrapeDate));
 
+            // Pre-randomize jobs for consistent pagination
             preRandomizedJobs = shuffleArray(filteredJobs);
+
+            // Initialize job listings display
             displayJobListings(preRandomizedJobs);
         },
         error: function (error) {
@@ -56,6 +58,9 @@ function fetchSponsoredJobsBySector(sector) {
     });
 }
 
+/**
+ * Fetch all job listings and initialize randomization
+ */
 function fetchJobListings() {
     Papa.parse('scrape/job_listings.csv', {
         download: true,
@@ -63,7 +68,10 @@ function fetchJobListings() {
         complete: function (results) {
             const jobs = normalizeSponsoredField(results.data);
 
+            // Pre-randomize jobs for consistent pagination
             preRandomizedJobs = shuffleArray(jobs);
+
+            // Initialize job listings display
             displayJobListings(preRandomizedJobs);
         },
         error: function (error) {
@@ -72,6 +80,9 @@ function fetchJobListings() {
     });
 }
 
+/**
+ * Normalize the "Sponsored" field for consistent filtering
+ */
 function normalizeSponsoredField(jobs) {
     return jobs.map(job => ({
         ...job,
@@ -79,6 +90,9 @@ function normalizeSponsoredField(jobs) {
     }));
 }
 
+/**
+ * Shuffle an array to randomize its elements
+ */
 function shuffleArray(array) {
     for (let i = array.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
@@ -87,10 +101,11 @@ function shuffleArray(array) {
     return array;
 }
 
+/**
+ * Arrange jobs for each page to include sponsored jobs in specific positions
+ */
 function arrangeSponsoredJobs(jobs, pageIndex, pageSize) {
-    const sponsoredJobs = jobs.filter(
-        job => job['Sponsored'] === true && !usedSponsoredJobs.includes(job['Job URL'])
-    );
+    const sponsoredJobs = jobs.filter(job => job['Sponsored'] === true);
     const regularJobs = jobs.filter(job => job['Sponsored'] !== true);
 
     const arrangedJobs = [];
@@ -100,9 +115,7 @@ function arrangeSponsoredJobs(jobs, pageIndex, pageSize) {
     for (let i = startIndex; i < endIndex; i++) {
         const position = i % pageSize;
         if ((position === 0 || position === 4) && sponsoredJobs.length > 0) {
-            const sponsoredJob = sponsoredJobs.shift();
-            arrangedJobs.push(sponsoredJob);
-            usedSponsoredJobs.push(sponsoredJob['Job URL']); // Mark as used
+            arrangedJobs.push(sponsoredJobs.shift());
         } else if (regularJobs.length > 0) {
             arrangedJobs.push(regularJobs.shift());
         }
@@ -111,6 +124,9 @@ function arrangeSponsoredJobs(jobs, pageIndex, pageSize) {
     return arrangedJobs;
 }
 
+/**
+ * Display job listings for the current page
+ */
 function displayJobListings(jobs) {
     const jobListingsContainer = document.getElementById('job-listings');
     if (!jobListingsContainer) {
@@ -118,13 +134,16 @@ function displayJobListings(jobs) {
         return;
     }
 
+    // Only process jobs for the current page
     const currentJobs = jobs.slice(
         currentPage * jobsPerPage,
         (currentPage + 1) * jobsPerPage
     );
 
+    // Arrange jobs for the current page
     const arrangedJobs = arrangeSponsoredJobs(jobs, currentPage, jobsPerPage);
 
+    // Render arranged jobs
     arrangedJobs.forEach(job => {
         const jobCard = document.createElement('div');
         jobCard.className = 'job-cards';
@@ -132,11 +151,13 @@ function displayJobListings(jobs) {
         const isSponsored = job['Sponsored'] === true;
         const jobURL = job['Job URL'];
 
+        // Add sponsored styles and badge
         if (isSponsored) {
             jobCard.classList.add('sponsored');
             jobCard.innerHTML += `<div class="badge">${job['Category'] || 'Sponsored'}</div>`;
         }
 
+        // Build job card content
         jobCard.innerHTML += `
             <h3>${job['Job Title'] || 'Not specified'}</h3>
             <p><strong>Employer:</strong> ${job['Employer'] || 'Not specified'}</p>
@@ -146,16 +167,21 @@ function displayJobListings(jobs) {
             <button class="read-more" onclick="window.open('${jobURL}', '_blank')">Read More</button>
         `;
 
+        // Append the job card to the container
         jobListingsContainer.appendChild(jobCard);
     });
 
     currentPage++;
 }
 
+/**
+ * Infinite scroll event listener
+ */
 window.addEventListener('scroll', () => {
     const { scrollTop, scrollHeight, clientHeight } = document.documentElement;
 
     if (scrollTop + clientHeight >= scrollHeight - 50) {
+        // Load more jobs if available
         if (currentPage * jobsPerPage < preRandomizedJobs.length) {
             displayJobListings(preRandomizedJobs);
         }
