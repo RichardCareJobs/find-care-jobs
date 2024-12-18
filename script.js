@@ -64,12 +64,20 @@ function fetchJobListings() {
             const jobs = normalizeSponsoredField(results.data);
 
             preRandomizedJobs = shuffleArray(jobs);
+            updateJobCount(preRandomizedJobs.length); // Update job count
             displayJobListings(preRandomizedJobs);
         },
         error: function (error) {
             console.error('Error fetching the CSV file:', error);
         }
     });
+}
+
+async function updateJobCount(count) {
+    const jobCountElement = document.getElementById('job-count');
+    if (jobCountElement) {
+        jobCountElement.textContent = `${count} Care Industry Jobs`;
+    }
 }
 
 function normalizeSponsoredField(jobs) {
