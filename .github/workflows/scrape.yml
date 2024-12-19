@@ -22,6 +22,8 @@ jobs:
 
     - name: Install dependencies
       run: npm install
+      working-directory: ./scrape
 
     - name: Run scrape script
-      run: node scrape/scrape.js
+      run: node scrape.js
+      working-directory: ./scrape
