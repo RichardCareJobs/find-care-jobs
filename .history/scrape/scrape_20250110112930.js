@@ -3,11 +3,11 @@ const cheerio = require('cheerio');
 const createCsvWriter = require('csv-writer').createObjectCsvWriter;
 const fs = require('fs');
 const csvParser = require('csv-parser');
-const crypto = require('crypto');
 
+// Target URLs for scraping with associated employer names
 const TARGET_URLS = [
-    { url: 'https://careers.uniting.org/jobs/search?page=1&query=&category_uids%5B%5D=400c8606503e937687a9f8f39aba8f88', employer: 'Uniting Care - Aged Care' },
-    { url: 'https://careers.uniting.org/jobs/search?page=1&query=&category_uids%5B%5D=5b6fd8bdee29e4a5be4b41a9abb42451', employer: 'Uniting Care - Disability Support' },
+    { url: 'https://careers.uniting.org/jobs/search?page=1&query=&category_uids%5B%5D=400c8606503e937687a9f8f39aba8f88', employer: 'Uniting Care' }, // aged care
+    { url: 'https://careers.uniting.org/jobs/search?page=1&query=&category_uids%5B%5D=5b6fd8bdee29e4a5be4b41a9abb42451', employer: 'Uniting Care' }, // disability support
     { url: 'https://careers.hammond.com.au/jobs/search?page=1&query=', employer: 'Hammond Care' },
     { url: 'https://careers.whiddon.com.au/en/listing/', employer: 'Whiddon' },
     { url: 'https://careers.lwb.org.au/en/listing/', employer: 'Life Without Barriers' },
@@ -16,16 +16,14 @@ const TARGET_URLS = [
     { url: 'https://careers.baptistcare.org.au/jobs/search', employer: 'Baptist Care' }
 ];
 
+// Define the CSV path
+const csvPath = 'C:\\Users\\Maca\\Documents\\find-care-jobs-mvp\\scrape\\job_listings.csv';
 
-// Paths for CSV files
-const jobsCsvPath = 'C:\\Users\\Maca\\Documents\\find-care-jobs-mvp\\scrape\\job_listings.csv';
-const sponsorshipCsvPath = 'C:\\Users\\Maca\\Documents\\find-care-jobs-mvp\\scrape\\sponsored_jobs.csv';
 
-// Set up CSV writers
-const jobsCsvWriter = createCsvWriter({
-    path: jobsCsvPath,
+// Set up CSV writer
+const csvWriter = createCsvWriter({
+    path: 'C:\\Users\\Maca\\Documents\\find-care-jobs-mvp\\scrape\\job_listings.csv',
     header: [
-        { id: 'id', title: 'ID' },
         { id: 'jobTitle', title: 'Job Title' },
         { id: 'location', title: 'Location' },
         { id: 'sector', title: 'Sector' },
@@ -33,94 +31,140 @@ const jobsCsvWriter = createCsvWriter({
         { id: 'closingDate', title: 'Closing Date' },
         { id: 'jobURL', title: 'Job URL' },
         { id: 'employer', title: 'Employer' },
+        { id: 'sponsored', title: 'Sponsored' },
+        { id: 'category', title: 'Category' },
+        { id: 'sponsorshipStartDate', title: 'Sponsorship Start Date' },
         { id: 'scrapeDate', title: 'Scrape Date' }
     ]
 });
 
-// Function to generate a unique job ID
-function generateJobId(job) {
-    const url = job.jobURL?.trim() || 'unknown-url';
-    const employer = job.employer?.trim() || 'unknown-employer';
-    return crypto.createHash('md5').update(`${url}-${employer}`).digest('hex');
-}
-
-// Function to clean and validate job data
-function cleanJobData(job) {
-    const cleanedJob = {
-        id: generateJobId(job),
-        jobTitle: job.jobTitle?.trim() || 'Not specified',
-        location: job.location?.trim() || 'Not specified',
-        sector: job.sector?.trim() || 'Not specified',
-        jobType: job.jobType?.trim() || 'Not specified',
-        closingDate: job.closingDate?.trim() || 'Not specified',
-        jobURL: job.jobURL?.trim() || 'Not specified',
-        employer: job.employer?.trim() || 'Not specified',
-        scrapeDate: job.scrapeDate || new Date().toISOString().split('T')[0],
-    };
-
-    // Log a warning if critical fields are missing
-    if (cleanedJob.jobTitle === 'Not specified' || cleanedJob.jobURL === 'Not specified') {
-        console.warn(`Incomplete job data detected: ${JSON.stringify(cleanedJob)}`);
-    }
-
-    return cleanedJob;
-}
-
-// Load existing jobs from CSV
-async function loadExistingJobs(filePath) {
-    const jobs = [];
+// Function to load existing jobs from the CSV file
+async function loadExistingJobs() {
+    const existingJobs = [];
     return new Promise((resolve, reject) => {
-        fs.createReadStream(filePath)
+        fs.createReadStream(csvPath)
             .pipe(csvParser())
-            .on('data', (row) => jobs.push(row))
-            .on('end', () => resolve(jobs))
-            .on('error', reject);
+            .on('data', (row) => {
+                existingJobs.push({
+                    ...row,
+                    sponsored: row.sponsored || 'false',
+                    category: row.category || '',
+                    sponsorshipStartDate: row.sponsorshipStartDate || '',
+                });
+            })
+            .on('end', () => {
+                console.log('Existing Jobs Loaded:', existingJobs.length);
+                resolve(existingJobs);
+            })
+            .on('error', (error) => {
+                reject(error);
+            });
     });
 }
 
-// Write jobs to CSV
-async function writeJobsToCsv(jobs, filePath) {
-    const writer = createCsvWriter({
-        path: filePath,
-        header: [
-            { id: 'id', title: 'ID' },
-            { id: 'jobTitle', title: 'Job Title' },
-            { id: 'location', title: 'Location' },
-            { id: 'sector', title: 'Sector' },
-            { id: 'jobType', title: 'Job Type' },
-            { id: 'closingDate', title: 'Closing Date' },
-            { id: 'jobURL', title: 'Job URL' },
-            { id: 'employer', title: 'Employer' },
-            { id: 'scrapeDate', title: 'Scrape Date' }
-        ]
-    });
-    await writer.writeRecords(jobs);
-}
-
-// Merge scraped jobs with existing jobs
-function mergeJobs(existingJobs, scrapedJobs) {
+// Merge data function
+function mergeData(existingJobs, scrapedJobs) {
     const existingJobsMap = existingJobs.reduce((map, job) => {
-        map[job.id] = job;
+        const key = `${job.jobURL}-${job.employer}`;
+        map[key] = job;
         return map;
     }, {});
 
-    const finalJobs = scrapedJobs.map((job) => {
-        const id = generateJobId(job);
-        const existingJob = existingJobsMap[id];
-        return {
-            ...job,
-            id,
-            scrapeDate: new Date().toISOString().split('T')[0], // Update scrape date
-            ...(existingJob ? { ...existingJob } : {}) // Retain details of existing jobs
-        };
-    });
+    const finalJobList = [];
 
-    // Filter out jobs no longer live in the scrape
-    const scrapedJobIds = new Set(scrapedJobs.map((job) => generateJobId(job)));
-    return finalJobs.filter((job) => scrapedJobIds.has(job.id));
+    // Step 1: Process scraped jobs
+    for (const scrapedJob of scrapedJobs) {
+        const key = `${scrapedJob.jobURL}-${scrapedJob.employer}`;
+        const existingJob = existingJobsMap[key];
+
+        if (existingJob) {
+            // Retain sponsorship and other data for jobs still live
+            scrapedJob.sponsored = existingJob.sponsored;
+            scrapedJob.category = existingJob.category;
+            scrapedJob.sponsorshipStartDate = existingJob.sponsorshipStartDate;
+
+            if (existingJob.sponsored === 'true') {
+                const sponsorshipStartDate = new Date(existingJob.sponsorshipStartDate);
+                const daysSponsored = (new Date() - sponsorshipStartDate) / (1000 * 60 * 60 * 24);
+
+                // Expire sponsorship after 30 days
+                if (daysSponsored > 30) {
+                    scrapedJob.sponsored = 'false';
+                    scrapedJob.category = '';
+                    scrapedJob.sponsorshipStartDate = '';
+                }
+            }
+        } else {
+            // New job defaults
+            scrapedJob.sponsored = 'false';
+            scrapedJob.category = '';
+            scrapedJob.sponsorshipStartDate = '';
+        }
+
+        finalJobList.push(scrapedJob);
+    }
+
+    // Step 2: Retain sponsored jobs not found in the scrape but still valid
+    for (const existingJob of existingJobs) {
+        const key = `${existingJob.jobURL}-${existingJob.employer}`;
+        const isNotInScrapedJobs = !scrapedJobs.some(job => `${job.jobURL}-${job.employer}` === key);
+
+        if (isNotInScrapedJobs && existingJob.sponsored === 'true') {
+            const sponsorshipStartDate = new Date(existingJob.sponsorshipStartDate);
+            const daysSponsored = (new Date() - sponsorshipStartDate) / (1000 * 60 * 60 * 24);
+
+            if (daysSponsored <= 30) {
+                // Retain the sponsored job
+                finalJobList.push(existingJob);
+            }
+        }
+    }
+
+    return finalJobList;
 }
 
-// Scraping functions for each source
+
+
+// Helper function to randomize job listings within each date
+function shuffleArray(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
+}
+
+// Function to group jobs by date and randomize within each group
+function groupAndRandomizeJobsByDate(jobs) {
+    const jobsByDate = jobs.reduce((acc, job) => {
+        const date = job.scrapeDate;
+        if (!acc[date]) acc[date] = [];
+        acc[date].push(job);
+        return acc;
+    }, {});
+
+    const randomizedJobs = [];
+    Object.keys(jobsByDate)
+        .sort((a, b) => new Date(b) - new Date(a)) // Sort by date in descending order
+        .forEach(date => {
+            const shuffledJobs = shuffleArray(jobsByDate[date]);
+            randomizedJobs.push(...shuffledJobs);
+        });
+
+    return randomizedJobs;
+}
+
+// Function to write jobs to the CSV
+async function writeToCsv(finalJobList) {
+    try {
+        await csvWriter.writeRecords(finalJobList);
+        console.log('Job listings have been written to job_listings.csv');
+    } catch (error) {
+        console.error('Error writing to CSV:', error);
+    }
+}
+
+// Scraping fun ctions for each source
 async function scrapeUnitingCareAgedCare(url, employer) {
     let jobListings = [];
     let currentPage = 1;
@@ -488,32 +532,39 @@ async function scrapeBaptistCareJobs(url, employer) {
     return jobListings;
 }
 
-// Main function
+
+
+
+// Main function to orchestrate scraping from multiple sources
 (async () => {
     try {
-        // Scrape jobs from all sources
-        let scrapedJobs = [];
-        scrapedJobs = scrapedJobs.concat(await scrapeUnitingCareAgedCare(TARGET_URLS[0].url, TARGET_URLS[0].employer));
-        scrapedJobs = scrapedJobs.concat(await scrapeUnitingCareDisabilitySupport(TARGET_URLS[1].url, TARGET_URLS[1].employer));
-        scrapedJobs = scrapedJobs.concat(await scrapeHammondCareJobs(TARGET_URLS[2].url, TARGET_URLS[2].employer));
-        scrapedJobs = scrapedJobs.concat(await scrapeWhiddonJobs(TARGET_URLS[3].url, TARGET_URLS[3].employer));
-        scrapedJobs = scrapedJobs.concat(await scrapeLifeWithoutBarriersJobs(TARGET_URLS[4].url, TARGET_URLS[4].employer));
-        scrapedJobs = scrapedJobs.concat(await scrapeLifestyleSolutionsJobs(TARGET_URLS[5].url, TARGET_URLS[5].employer));
-        scrapedJobs = scrapedJobs.concat(await scrapeOpalHealthcareJobs(TARGET_URLS[6].url, TARGET_URLS[6].employer));
-        scrapedJobs = scrapedJobs.concat(await scrapeBaptistCareJobs(TARGET_URLS[7].url, TARGET_URLS[7].employer));
+        // Step 1: Scrape data from all sources
+        let allJobListings = [];
+        allJobListings = allJobListings.concat(await scrapeUnitingCareAgedCare(TARGET_URLS[0].url, TARGET_URLS[0].employer));
+        allJobListings = allJobListings.concat(await scrapeUnitingCareDisabilitySupport(TARGET_URLS[1].url, TARGET_URLS[1].employer));
+        allJobListings = allJobListings.concat(await scrapeHammondCareJobs(TARGET_URLS[2].url, TARGET_URLS[2].employer));
+        allJobListings = allJobListings.concat(await scrapeWhiddonJobs(TARGET_URLS[3].url, TARGET_URLS[3].employer));
+        allJobListings = allJobListings.concat(await scrapeLifeWithoutBarriersJobs(TARGET_URLS[4].url, TARGET_URLS[4].employer));
+        allJobListings = allJobListings.concat(await scrapeLifestyleSolutionsJobs(TARGET_URLS[5].url, TARGET_URLS[5].employer));
+        allJobListings = allJobListings.concat(await scrapeOpalHealthcareJobs(TARGET_URLS[6].url, TARGET_URLS[6].employer));
+        allJobListings = allJobListings.concat(await scrapeBaptistCareJobs(TARGET_URLS[7].url, TARGET_URLS[7].employer));
 
-        // Load existing jobs
-        const existingJobs = await loadExistingJobs(jobsCsvPath);
+        console.log(`Scraped a total of ${allJobListings.length} jobs from all sources.`);
 
-        // Merge scraped jobs with existing jobs
-        const finalJobs = mergeJobs(existingJobs, scrapedJobs);
+        // Step 2: Load existing jobs from CSV
+        const existingJobs = await loadExistingJobs();
+        console.log(`Loaded ${existingJobs.length} existing jobs from the CSV file.`);
 
-        // Write final jobs to CSV
-        await writeJobsToCsv(finalJobs, jobsCsvPath);
+        // Step 3: Merge scraped data with existing data
+        const finalJobList = mergeData(existingJobs, allJobListings);
+        console.log(`Merged job data. Total jobs after merge: ${finalJobList.length}`);
 
-        console.log('Job scraping and update completed.');
+        // Step 4: Write the final job list to the CSV
+        await writeToCsv(finalJobList);
+
     } catch (error) {
-        console.error('Error during scraping:', error);
+        console.error('Error in scraping:', error);
     }
 })();
+
 

@@ -5,18 +5,6 @@ const fs = require('fs');
 const csvParser = require('csv-parser');
 const crypto = require('crypto');
 
-const TARGET_URLS = [
-    { url: 'https://careers.uniting.org/jobs/search?page=1&query=&category_uids%5B%5D=400c8606503e937687a9f8f39aba8f88', employer: 'Uniting Care - Aged Care' },
-    { url: 'https://careers.uniting.org/jobs/search?page=1&query=&category_uids%5B%5D=5b6fd8bdee29e4a5be4b41a9abb42451', employer: 'Uniting Care - Disability Support' },
-    { url: 'https://careers.hammond.com.au/jobs/search?page=1&query=', employer: 'Hammond Care' },
-    { url: 'https://careers.whiddon.com.au/en/listing/', employer: 'Whiddon' },
-    { url: 'https://careers.lwb.org.au/en/listing/', employer: 'Life Without Barriers' },
-    { url: 'https://careers.lifestylesolutions.org.au/jobs/search', employer: 'Lifestyle Solutions' },
-    { url: 'https://globalaus242.dayforcehcm.com/CandidatePortal/en-AU/opalhealthcare', employer: 'Opal Healthcare' },
-    { url: 'https://careers.baptistcare.org.au/jobs/search', employer: 'Baptist Care' }
-];
-
-
 // Paths for CSV files
 const jobsCsvPath = 'C:\\Users\\Maca\\Documents\\find-care-jobs-mvp\\scrape\\job_listings.csv';
 const sponsorshipCsvPath = 'C:\\Users\\Maca\\Documents\\find-care-jobs-mvp\\scrape\\sponsored_jobs.csv';
@@ -39,31 +27,7 @@ const jobsCsvWriter = createCsvWriter({
 
 // Function to generate a unique job ID
 function generateJobId(job) {
-    const url = job.jobURL?.trim() || 'unknown-url';
-    const employer = job.employer?.trim() || 'unknown-employer';
-    return crypto.createHash('md5').update(`${url}-${employer}`).digest('hex');
-}
-
-// Function to clean and validate job data
-function cleanJobData(job) {
-    const cleanedJob = {
-        id: generateJobId(job),
-        jobTitle: job.jobTitle?.trim() || 'Not specified',
-        location: job.location?.trim() || 'Not specified',
-        sector: job.sector?.trim() || 'Not specified',
-        jobType: job.jobType?.trim() || 'Not specified',
-        closingDate: job.closingDate?.trim() || 'Not specified',
-        jobURL: job.jobURL?.trim() || 'Not specified',
-        employer: job.employer?.trim() || 'Not specified',
-        scrapeDate: job.scrapeDate || new Date().toISOString().split('T')[0],
-    };
-
-    // Log a warning if critical fields are missing
-    if (cleanedJob.jobTitle === 'Not specified' || cleanedJob.jobURL === 'Not specified') {
-        console.warn(`Incomplete job data detected: ${JSON.stringify(cleanedJob)}`);
-    }
-
-    return cleanedJob;
+    return crypto.createHash('md5').update(`${job.jobURL}-${job.employer}`).digest('hex');
 }
 
 // Load existing jobs from CSV
@@ -493,14 +457,7 @@ async function scrapeBaptistCareJobs(url, employer) {
     try {
         // Scrape jobs from all sources
         let scrapedJobs = [];
-        scrapedJobs = scrapedJobs.concat(await scrapeUnitingCareAgedCare(TARGET_URLS[0].url, TARGET_URLS[0].employer));
-        scrapedJobs = scrapedJobs.concat(await scrapeUnitingCareDisabilitySupport(TARGET_URLS[1].url, TARGET_URLS[1].employer));
-        scrapedJobs = scrapedJobs.concat(await scrapeHammondCareJobs(TARGET_URLS[2].url, TARGET_URLS[2].employer));
-        scrapedJobs = scrapedJobs.concat(await scrapeWhiddonJobs(TARGET_URLS[3].url, TARGET_URLS[3].employer));
-        scrapedJobs = scrapedJobs.concat(await scrapeLifeWithoutBarriersJobs(TARGET_URLS[4].url, TARGET_URLS[4].employer));
-        scrapedJobs = scrapedJobs.concat(await scrapeLifestyleSolutionsJobs(TARGET_URLS[5].url, TARGET_URLS[5].employer));
-        scrapedJobs = scrapedJobs.concat(await scrapeOpalHealthcareJobs(TARGET_URLS[6].url, TARGET_URLS[6].employer));
-        scrapedJobs = scrapedJobs.concat(await scrapeBaptistCareJobs(TARGET_URLS[7].url, TARGET_URLS[7].employer));
+        scrapedJobs = scrapedJobs.concat(await scrapeJobsFromSource(TARGET_URLS[0].url, TARGET_URLS[0].employer, 'Aged Care'));
 
         // Load existing jobs
         const existingJobs = await loadExistingJobs(jobsCsvPath);
@@ -516,4 +473,3 @@ async function scrapeBaptistCareJobs(url, employer) {
         console.error('Error during scraping:', error);
     }
 })();
-

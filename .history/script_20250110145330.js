@@ -122,7 +122,11 @@ function displayJobListings(jobs) {
 
     currentPage++;
 }
-
+if (isSponsored) {
+    console.log(`Sponsored job detected: ${job['Job Title']}`);
+    jobCard.classList.add('sponsored');
+    jobCard.innerHTML += `<div class="badge">${job['Category'] || 'Sponsored'}</div>`;
+}
 
 
 // Fetch Job Listings
