@@ -39,31 +39,7 @@ const jobsCsvWriter = createCsvWriter({
 
 // Function to generate a unique job ID
 function generateJobId(job) {
-    const url = job.jobURL?.trim() || 'unknown-url';
-    const employer = job.employer?.trim() || 'unknown-employer';
-    return crypto.createHash('md5').update(`${url}-${employer}`).digest('hex');
-}
-
-// Function to clean and validate job data
-function cleanJobData(job) {
-    const cleanedJob = {
-        id: generateJobId(job),
-        jobTitle: job.jobTitle?.trim() || 'Not specified',
-        location: job.location?.trim() || 'Not specified',
-        sector: job.sector?.trim() || 'Not specified',
-        jobType: job.jobType?.trim() || 'Not specified',
-        closingDate: job.closingDate?.trim() || 'Not specified',
-        jobURL: job.jobURL?.trim() || 'Not specified',
-        employer: job.employer?.trim() || 'Not specified',
-        scrapeDate: job.scrapeDate || new Date().toISOString().split('T')[0],
-    };
-
-    // Log a warning if critical fields are missing
-    if (cleanedJob.jobTitle === 'Not specified' || cleanedJob.jobURL === 'Not specified') {
-        console.warn(`Incomplete job data detected: ${JSON.stringify(cleanedJob)}`);
-    }
-
-    return cleanedJob;
+    return crypto.createHash('md5').update(`${job.jobURL}-${job.employer}`).digest('hex');
 }
 
 // Load existing jobs from CSV

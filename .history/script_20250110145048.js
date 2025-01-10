@@ -122,7 +122,11 @@ function displayJobListings(jobs) {
 
     currentPage++;
 }
-
+if (isSponsored) {
+    console.log(`Sponsored job detected: ${job['Job Title']}`);
+    jobCard.classList.add('sponsored');
+    jobCard.innerHTML += `<div class="badge">${job['Category'] || 'Sponsored'}</div>`;
+}
 
 
 // Fetch Job Listings
@@ -185,18 +189,13 @@ async function updateJobCount(count) {
     }
 }
 
+// Infinite Scroll Event
 window.addEventListener('scroll', () => {
     const { scrollTop, scrollHeight, clientHeight } = document.documentElement;
 
-    console.log(`ScrollTop: ${scrollTop}, ClientHeight: ${clientHeight}, ScrollHeight: ${scrollHeight}`);
-
     if (scrollTop + clientHeight >= scrollHeight - 50) {
         if (currentPage * jobsPerPage < preRandomizedJobs.length) {
-            console.log('Loading more jobs...');
             displayJobListings(preRandomizedJobs);
-        } else {
-            console.log('No more jobs to load.');
         }
     }
 });
-

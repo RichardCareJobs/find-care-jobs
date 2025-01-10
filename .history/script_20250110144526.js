@@ -122,60 +122,49 @@ function displayJobListings(jobs) {
 
     currentPage++;
 }
-
+if (isSponsored) {
+    console.log(`Sponsored job detected: ${job['Job Title']}`);
+    jobCard.classList.add('sponsored');
+    jobCard.innerHTML += `<div class="badge">${job['Category'] || 'Sponsored'}</div>`;
+}
 
 
 // Fetch Job Listings
-async function fetchJobListings() {
-    const jobs = await fetchCsv('scrape/job_listings.csv');
-    const sponsorships = await fetchCsv('scrape/sponsored_jobs.csv');
-
-    const sponsorshipMap = sponsorships.reduce((map, job) => {
-        map[job.ID] = job; // Map sponsorship data by job ID
-        return map;
-    }, {});
-
-    const enrichedJobs = jobs.map((job) => {
-        const sponsoredData = sponsorshipMap[job.ID];
-        return {
-            ...job,
-            Sponsored: !!sponsoredData, // Add `Sponsored` boolean
-            Category: sponsoredData?.Category || '', // Add category if available
-        };
+function fetchJobListings() {
+    Papa.parse('scrape/job_listings.csv', {
+        download: true,
+        header: true,
+        complete: function (results) {
+            const jobs = normalizeSponsoredField(results.data);
+            preRandomizedJobs = shuffleArray(jobs);
+            updateJobCount(preRandomizedJobs.length); // Update job count
+            displayJobListings(preRandomizedJobs);
+        },
+        error: function (error) {
+            console.error('Error fetching the CSV file:', error);
+        },
     });
-
-    preRandomizedJobs = shuffleArray(enrichedJobs);
-    updateJobCount(preRandomizedJobs.length);
-    displayJobListings(preRandomizedJobs);
 }
-
 
 // Fetch Sponsored Jobs by Sector
-async function fetchSponsoredJobsBySector(sector) {
-    const jobs = await fetchCsv('scrape/job_listings.csv');
-    const sponsorships = await fetchCsv('scrape/sponsored_jobs.csv');
+function fetchSponsoredJobsBySector(sector) {
+    Papa.parse('scrape/job_listings.csv', {
+        download: true,
+        header: true,
+        complete: function (results) {
+            const jobs = normalizeSponsoredField(results.data);
+            const filteredJobs = jobs
+                .filter((job) => job['Sponsored'] === true && job['Sector'] === sector)
+                .sort((a, b) => new Date(b.scrapeDate) - new Date(a.scrapeDate));
 
-    const sponsorshipMap = sponsorships.reduce((map, job) => {
-        map[job.ID] = job; // Map sponsorship data by job ID
-        return map;
-    }, {});
-
-    const enrichedJobs = jobs.map((job) => {
-        const sponsoredData = sponsorshipMap[job.ID];
-        return {
-            ...job,
-            Sponsored: !!sponsoredData,
-            Category: sponsoredData?.Category || '',
-        };
+            preRandomizedJobs = shuffleArray(filteredJobs);
+            displayJobListings(preRandomizedJobs);
+        },
+        error: function (error) {
+            console.error('Error fetching the CSV file:', error);
+        },
     });
-
-    const filteredJobs = enrichedJobs.filter(
-        (job) => job.Sponsored && job.Sector === sector
-    );
-    preRandomizedJobs = shuffleArray(filteredJobs);
-    displayJobListings(preRandomizedJobs);
 }
-
 
 // Update Job Count
 async function updateJobCount(count) {
@@ -185,18 +174,13 @@ async function updateJobCount(count) {
     }
 }
 
+// Infinite Scroll Event
 window.addEventListener('scroll', () => {
     const { scrollTop, scrollHeight, clientHeight } = document.documentElement;
 
-    console.log(`ScrollTop: ${scrollTop}, ClientHeight: ${clientHeight}, ScrollHeight: ${scrollHeight}`);
-
     if (scrollTop + clientHeight >= scrollHeight - 50) {
         if (currentPage * jobsPerPage < preRandomizedJobs.length) {
-            console.log('Loading more jobs...');
             displayJobListings(preRandomizedJobs);
-        } else {
-            console.log('No more jobs to load.');
         }
     }
 });
-
