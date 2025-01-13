@@ -26,7 +26,7 @@ jobs:
       working-directory: ./scrape
 
     - name: Download job_listings.csv
-      run: wget -O ./scrape/job_listings.csv https://raw.githubusercontent.com/RichardCareJobs/find-care-jobs/main/scrape/job_listings.csv
+      run: cat scrape/job_listings.csv
 
     - name: Run scrape script
       run: node scrape.js
