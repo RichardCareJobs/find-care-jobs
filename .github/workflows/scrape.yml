@@ -29,7 +29,13 @@ jobs:
       run: mkdir -p ./scrape  
 
     - name: Download job_listings.csv
-      run: cat scrape/job_listings.csv
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        curl -H "Authorization: token $GITHUB_TOKEN" \
+             -H "Accept: application/vnd.github.v3.raw" \
+             -o ./scrape/job_listings.csv \
+             -L https://api.github.com/repos/paskie-fcj/find-care-jobs/contents/scrape/job_listings.csv
 
     - name: Run scrape script
       run: node scrape.js
