@@ -25,6 +25,9 @@ jobs:
       run: npm install
       working-directory: ./scrape
 
+    - name: Create scrape directory
+      run: mkdir -p ./scrape  
+
     - name: Download job_listings.csv
       run: cat scrape/job_listings.csv
 
