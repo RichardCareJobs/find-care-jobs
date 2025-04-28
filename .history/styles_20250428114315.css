@@ -1,0 +1,660 @@
+body {
+    background-color: #ffffff; /* Warm Sand background for the whole page */
+    font-family: Arial, sans-serif; /* Set a clean font */
+    margin: 0;
+    padding: 20px; /* Optional: adds padding to the content */
+    color: #333; /* Dark text color for good contrast */
+}
+
+
+
+.hero-overlay h1,
+.hero-overlay h2,
+.hero-overlay h3,
+.hero-overlay p,
+.hero-overlay a {
+  color: #fff;
+}
+
+/* ——— Header override to match Home page ——— */
+header.header-container {
+    position: fixed;
+    top: 0; left: 0; width: 100vw;
+    height: 80px;                 /* ↑ bigger bar like Home */
+    padding: 10px 40px;           /* ↑ vertical + horizontal spacing */
+    background-color: var(--primary-color);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    z-index: 1000;
+    box-sizing: border-box;
+  }
+  
+  /* Logo link must be white, not teal */
+  .header-container .logo a {
+    color: #fff;
+    text-decoration: none;
+    font-size: 1.2rem;
+    font-weight: bold;
+  }
+  
+  /* Nav links stay white on teal */
+  .header-container .nav-links a {
+    color: #fff;
+  }
+  
+  .header-container .nav-links a:hover {
+    color: var(--accent-color);
+  }
+  
+
+/* New unified header container */
+.header-container {
+    display: flex;
+    justify-content: space-between; /* Logo on left, nav/hamburger on right */
+    align-items: center;
+    padding: 0 20px;
+    height: 80px; /* Adjust height as needed */
+    background-color: #4E8A8B; /* Muted Teal for the header background */
+    box-sizing: border-box;
+    position: fixed; /* Keep header visible on scroll */
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 1000;
+  }
+  
+  /* Logo styling (placeholder) */
+  .logo {
+    color: #fff;
+    font-size: 1.2rem;
+    font-weight: bold;
+  }
+  
+  /* Desktop navigation links */
+  .nav-links {
+    display: flex;
+    gap: 20px;
+  }
+  
+  .nav-links a {
+    color: #fff;
+    text-decoration: none;
+    font-size: 16px;
+  }
+  
+  .nav-links a:hover {
+    color: #FF6F61; /* Soft Coral on hover */
+  }
+  
+  /* Hamburger menu icon – hidden on desktop */
+  .hamburger-menu {
+    display: none; /* Show only on mobile */
+    color: #fff;
+    font-size: 24px;
+    cursor: pointer;
+  }
+  
+  /* Mobile navigation menu – hidden by default */
+  .mobile-nav {
+    display: none;
+    flex-direction: column;
+    background-color: #4E8A8B;
+    position: absolute;
+    top: 60px; /* Immediately below the header */
+    left: 0;
+    width: 100%;
+    box-sizing: border-box;
+    z-index: 2000; /* Ensures mobile menu appears above other content */
+  }
+  
+  .mobile-nav a {
+    color: #fff;
+    padding: 10px 20px;
+    text-decoration: none;
+    border-bottom: 1px solid #fff;
+  }
+  
+  /* Media query: On screens 768px and below, hide desktop nav and show hamburger */
+  @media (max-width: 768px) {
+    .nav-links {
+      display: none;
+    }
+    .hamburger-menu {
+      display: block;
+    }
+  }
+  
+  /* For tablets and smaller screens */
+@media (max-width: 768px) {
+    /* Adjust font sizes, layout, etc. for tablet screens */
+  }
+  
+  /* For mobile devices */
+  @media (max-width: 480px) {
+    /* Further adjustments for mobile screens */
+  }
+
+  @media (max-width: 768px) {
+    .hero .search-bar {
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+    gap: 10px;
+    }
+  
+    .hero .search-bar input[type="text"],
+    .hero .search-bar button {
+      width: 100%;
+      max-width: 220px;
+    }
+  
+    .hero .search-bar button {
+      margin-top: 10px;
+    }
+  }
+  
+  
+  /* Hero Section: set the background image, size, and positioning */
+.hero {
+    position: relative;
+    background-image: url('images/fcj-hero-v1.png'); /* Replace with your image path */
+    background-size: cover;
+    background-position: center;
+    height: 500px; /* Adjust height as needed */
+    width: 100vw;  /* Use viewport width */
+  margin-left: calc(-50vw + 50%);  /* Shift left to counteract body padding */
+  color: #fff; /* This makes all text white */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  /* Overlay for darkening the background and centering text */
+  .hero-overlay {
+    background: rgba(0, 0, 0, 0.5); /* Semi-transparent overlay for readability */
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    text-align: center;
+    padding: 0px;
+    box-sizing: border-box;
+  }
+  
+  /* Adjust the search bar for the hero section */
+  .hero .search-bar {
+    margin-top: 20px;
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+  }
+  
+  .hero .search-bar input[type="text"] {
+    padding: 10px;
+    border-radius: 8px;
+    border: none; /* Remove border for a cleaner look */
+    font-size: 16px;
+    width: 200px;
+    max-width: 300px;
+  }
+  
+  .hero .search-bar button {
+    padding: 10px 20px;
+    border-radius: 8px;
+    background-color: var(--accent-color); /* Using your accent color variable */
+    border: none;
+    color: #fff;
+    font-size: 16px;
+    cursor: pointer;
+  }
+  
+  .hero .search-bar button:hover {
+    background-color: #FF6F61; /* Soft Coral on hover */
+  }
+  
+
+/* Navigation menu styles */
+header nav {
+    display: flex;
+    gap: 20px; /* Space between links */
+}
+
+header nav a {
+    color: #fff; /* White color for the links */
+    text-decoration: none;
+    font-size: 16px;
+}
+
+header nav a:hover {
+    color: #FF6F61; /* Soft Coral on hover */
+}
+
+/* Center the h1 title */
+.header-middle h1 {
+    font-size: 24px;
+    color: #4E8A8B; /* Muted Teal for the title */
+    margin: 0;
+}
+
+/* Search bar container styles */
+.search-bar {
+    display: flex;
+    gap: 10px;
+    justify-content: center; /* Center the search inputs and button */
+    margin-top: 20px;
+}
+
+/* Styling for the search input fields */
+.search-bar input[type="text"] {
+    padding: 10px;
+    border-radius: 8px; /* Rounded corners */
+    border: 2px solid #A8E6CF; /* Light Mint border */
+    font-size: 16px;
+    width: 200px; /* Set a width for the input fields */
+    max-width: 300px; /* Maximum width for better responsiveness */
+}
+
+.search-bar input[type="text"]:focus {
+    outline: none;
+    border-color: #FF6F61; /* Soft Coral border on focus */
+}
+
+/* Styling for the search button */
+.search-bar button {
+    padding: 10px 20px;
+    border-radius: 8px; /* Rounded corners */
+    background-color: #A8E6CF; /* Light Mint background */
+    border: 2px solid #A8E6CF; /* Light Mint border */
+    color: #fff;
+    font-size: 16px;
+    cursor: pointer; /* Pointer cursor on hover */
+}
+
+/* Button hover effect */
+.search-bar button:hover {
+    background-color: #FF6F61; /* Soft Coral on hover */
+    border-color: #FF6F61; /* Change the border color on hover */
+}
+
+
+/* Job count text styling */
+#job-count {
+    text-align: center;
+    font-size: 18px;
+    color: #fff; /* Muted Teal color for consistency with the design */
+    margin-top: 20px;
+    font-weight: bold;
+}
+
+/* General styling for the filter section */
+.filter-section {
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: 'Arial', sans-serif;
+    font-size: 14px;
+    color: #424242;
+}
+
+/* Style for the label */
+.filter-section label {
+    font-weight: bold;
+    margin-right: 5px;
+}
+
+/* General styling for the filter section */
+.filter-section {
+    margin-top: 20px; /* Adds space between search and filter */
+    font-family: 'Arial', sans-serif; /* Match font with the rest of the site */
+    font-size: 16px; /* Adjust font size for better readability */
+    color: #4E8A8B; /* Match the color with the rest of the site */
+    display: flex; /* Use flexbox for horizontal alignment */
+    justify-content: center; /* Center-align within the container */
+    align-items: center; /* Align label and dropdown vertically */
+    gap: 10px; /* Space between the label and dropdown */
+}
+
+/* Style for the dropdown */
+.filter-section select {
+    padding: 8px 12px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background-color: #fff;
+    font-size: 14px;
+    color: #333; /* Match font color with the rest */
+    cursor: pointer;
+    transition: border-color 0.3s ease;
+    width: 200px; /* Set a consistent width for the dropdown */
+}
+
+.filter-section select:hover {
+    border-color: #0088d2; /* Match primary color */
+}
+
+.filter-section select:focus {
+    outline: none;
+    border-color: #fa9335; /* Match secondary color */
+}
+
+/* Label styling */
+.filter-section label {
+    font-weight: bold;
+    margin-bottom: 0; /* Remove extra margin for better alignment */
+}
+
+
+
+
+/* Job listings container space */
+.job-listings-container {
+    margin: 0 auto;
+    max-width: 1200px; /* or whatever width you prefer */
+    padding: 20px;
+    box-sizing: border-box;
+  }
+  
+
+
+
+/* Job listings container to center the job cards */
+.job-listings-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Center the job cards horizontally */
+    gap: 20px; /* Add space between each job card */
+    width: 100%;
+}
+
+/* Job card styles */
+.job-cards {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    border: 2px solid #A8E6CF; /* Light Mint border around the job cards */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    text-align: left; /* left align the text inside the job card */
+    width: 100%; /* Ensure the job card takes up full width */
+    max-width: 600px; /* Optional: set a max-width for better layout */
+    margin: 0; /* Remove margin from individual cards */
+}
+
+/* Styling for the "Read More" buttons */
+.job-cards .read-more {
+    padding: 10px 20px;
+    border-radius: 8px; /* Rounded corners */
+    background-color: #A8E6CF; /* Light Mint background */
+    border: 2px solid #A8E6CF; /* Light Mint border */
+    color: #fff;
+    font-size: 16px;
+    cursor: pointer; /* Pointer cursor on hover */
+    text-align: center; /* Center the text inside the button */
+    display: inline-block; /* Ensure the button has correct inline behavior */
+    margin-top: 10px; /* Add some space above the button */
+}
+
+/* Hover effect for the "Read More" button */
+.job-cards .read-more:hover {
+    background-color: #FF6F61; /* Soft Coral on hover */
+    border-color: #FF6F61; /* Change the border color on hover */
+}
+
+/* Streamline job cards */
+.job-listings-container {
+    gap: 10px;              /* was 20px – bring cards closer together */
+  }
+  
+  .job-cards {
+    padding: 12px;          /* was 20px – less “air” inside each card */
+    border-radius: 100px;     /* optional: slightly tighter corners */
+  }
+  
+  .job-cards h3 {
+    margin-top: 8px;        /* was 1rem – bring title closer to top badge/logo */
+    margin-bottom: 8px;     /* was default – tighten space before body text */
+  }
+  
+  .job-cards p {
+    margin-bottom: 8px;     /* was 1em – less space under each paragraph */
+  }
+  
+  .job-cards .read-more {
+    padding: 6px 12px;      /* was 10px 20px – smaller button */
+    font-size: 0.9rem;      /* slightly smaller text */
+    margin-top: 8px;        /* was 10px – reduce gap above button */
+  }
+  
+
+
+/* Base styles for sponsored jobs */
+.job-cards.sponsored {
+    border: 3px solid #FF6F61; /* Thicker border for sponsored jobs */
+    padding: 20px; /* Add more padding to create space */
+    background-color: #F5F5F5; /* Light background for sponsored jobs */
+    position: relative;
+    margin: 10px; /* Add some space between job cards */
+}
+
+/* Employer logo positioning (top right) */
+.job-cards.sponsored .employer-logo {
+    position: absolute;
+    top: 15px; /* Adjusted to move the logo further down */
+    right: 15px; /* Adjusted to move the logo further to the right */
+    width: 70px; /* Increased size of the logo */
+    height: auto;
+}
+
+/* Title adjustment if logo is displayed */
+.job-cards.sponsored h3 {
+    margin-top: 30px; /* Increased space between badge and job title */
+    margin-right: 90px; /* Adjust header text position if logo is displayed */
+}
+
+/* Sponsored job categories */
+.job-cards.sponsored.top-job {
+    border-color: #FF6F61; /* Top Job with coral border */
+}
+
+.job-cards.sponsored.featured-job {
+    border-color: #FFD700; /* Featured Job with gold border */
+}
+
+.job-cards.sponsored.urgent-job {
+    border-color: #FF4500; /* Urgent Job with orange-red border */
+}
+
+.job-cards.sponsored.popular-job {
+    border-color: #32CD32; /* Popular Job with lime green border */
+}
+
+/* Badge for Sponsored Jobs */
+.job-cards.sponsored .badge {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background-color: #FF6F61; /* Soft Coral for badge background */
+    color: #fff;
+    padding: 8px 12px; /* Add more padding for the badge */
+    border-radius: 10px; /* Make badge more rounded */
+    font-weight: bold;
+    font-size: 16px; /* Increase font size for better visibility */
+}
+
+/* Styling for the badge */
+.job-cards.sponsored.top-job .badge {
+    background-color: #FF6F61; /* Top Job Badge */
+}
+
+.job-cards.sponsored.featured-job .badge {
+    background-color: #FFD700; /* Featured Job Badge */
+}
+
+.job-cards.sponsored.urgent-job .badge {
+    background-color: #FF4500; /* Urgent Job Badge */
+}
+
+.job-cards.sponsored.popular-job .badge {
+    background-color: #32CD32; /* Popular Job Badge */
+}
+
+
+.global-footer {
+    background-color: #4E8A8B; /* Footer color */
+    color: white;
+    padding: 20px;
+    text-align: center;
+    width: 100vw; /* Viewport width */
+    position: relative; /* Ensure it stays within normal document flow */
+    left: 50%; /* Offset for centering */
+    transform: translateX(-50%); /* Center align the footer */
+    box-sizing: border-box; /* Include padding within width */
+    margin: 0; /* Remove any margin */
+}
+
+
+
+
+.global-footer nav {
+    display: flex;
+    justify-content: center;
+    gap: 20px; /* Space between footer links */
+}
+
+.global-footer a {
+    color: white;
+    text-decoration: none;
+    font-size: 16px;
+}
+
+.global-footer a:hover {
+    color: #FF6F61; /* Soft Coral on hover, matching header link styling */
+}
+
+
+
+.page-content {
+    display: flex;
+    align-items: flex-start; /* Align items to the top */
+    gap: 20px; /* Space between image and text */
+}
+
+.image-placeholder {
+    flex: 0 0 300px; /* Fixed width for the image container */
+}
+
+.image-placeholder img {
+    width: 100%; /* Image takes full width of its container */
+    height: auto;
+    border-radius: 5px; /* Optional rounded corners */
+    padding: 5px; /* Padding around the image for spacing */
+    background-color: #f0f0f0; /* Optional: background color for the image */
+}
+
+.text-content {
+    flex: 1; /* Take remaining space */
+    max-width: 600px; /* Limit text width for readability */
+}
+
+
+
+/* Root-level variables for colors, fonts, and font sizes */
+:root {
+    --primary-color: #4E8A8B;
+    --accent-color: #FF6F61;
+    --text-color: #333333;
+    --background-color: #F1E2C6;
+    --font-family: Arial, sans-serif;
+    --font-size-h1: 32px; /* You can adjust this size as needed */
+    --font-size-large: 24px;
+    --font-size-base: 16px;
+    --font-size-small: 14px;
+}
+
+header.header-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;             /* span the entire viewport */
+    height: var(--header-height);
+    background-color: var(--primary-color);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 20px;          /* no vertical padding, just left/right */
+    z-index: 1000;
+    box-sizing: border-box;
+  }
+  
+
+/* Apply global font and color styles */
+html {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    padding: 20px;
+    font-family: var(--font-family);
+    font-size: var(--font-size-base);
+    color: var(--text-color);
+}
+
+
+/* Heading styles */
+h1 {
+    font-size: var(--font-size-h1);
+    color: var(--primary-color);
+    font-weight: bold;
+}
+
+h2 {
+    font-size: 1.5em; /* This will scale with base font size */
+    color: var(--primary-color);
+    font-weight: bold;
+}
+
+
+h3, h4, h5, h6 {
+    color: var(--primary-color);
+}
+
+/* Paragraph and link styles */
+p {
+    font-size: var(--font-size-base);
+    line-height: 1.6;
+    margin: 0 0 1em;
+}
+
+a {
+    color: var(--primary-color);
+    text-decoration: none;
+}
+
+a:hover {
+    color: var(--accent-color);
+    text-decoration: underline;
+}
+
+/* Button styling */
+button {
+    font-size: var(--font-size-base);
+    color: #fff;
+    background-color: var(--primary-color);
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: var(--accent-color);
+}
+
+
+
