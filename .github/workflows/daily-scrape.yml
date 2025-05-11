@@ -1,40 +1,43 @@
 name: Daily Job Scrape
 
-# this runs at midnight UTC every day; adjust the cron if you want a different time
 on:
   schedule:
-    - cron: '0 0 * * *'
+    - cron: '0 0 * * *'       # runs at midnight UTC daily
   workflow_dispatch:
-
 
 jobs:
   scrape:
     runs-on: ubuntu-latest
     steps:
-      # 1. check out your repo and keep credentials so we can push
       - name: Checkout code
         uses: actions/checkout@v3
         with:
           persist-credentials: true
 
-      # 2. install the right Node.js version
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '18'
 
-      # 3. install dependencies (Cheerio, PapaParse, etc.)
       - name: Install dependencies
-        run: npm ci
+        run: npm install
 
-      # 4. run your scrape script
       - name: Run daily scrape
         run: node scrape/scrape.js
 
-      # 5. commit & push any changes to the CSVs
-      - name: Commit updated CSVs
+      - name: Archive CSVs
+        run: |
+          TIMESTAMP=$(date -u +'%Y-%m-%d_%H%M')
+          mkdir -p archive
+          cp scrape/job_listings.csv archive/job_listings_${TIMESTAMP}.csv
+          cp scrape/sponsored_jobs.csv archive/sponsored_jobs_${TIMESTAMP}.csv
+
+      - name: Commit updated + archived CSVs
         uses: EndBug/add-and-commit@v9
         with:
-          # glob out both your job listings and sponsored files
-          add: 'scrape/job_listings.csv,scrape/sponsored_jobs.csv'
-          message: 'chore: automated daily job scrape'
+          add: |
+            scrape/job_listings.csv,
+            scrape/sponsored_jobs.csv,
+            archive/**/*.csv
+          message: chore: automated daily scrape & archive
+
