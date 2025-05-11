@@ -209,80 +209,66 @@ async function fetchJobListings() {
 
 // Fetch and show exactly 4 latest sponsored jobs for this sector
 async function fetchSponsoredJobsBySector(sector) {
-    // 1. Load CSVs and build a map of sponsorship data
     const jobs         = await fetchCsv('scrape/job_listings.csv');
     const sponsorships = await fetchCsv('scrape/sponsored_jobs.csv');
-    const sponsorshipMap = sponsorships.reduce((map, s) => {
-      map[s.ID] = s;
-      return map;
-    }, {});
+    const sponsorshipMap = sponsorships.reduce((map, s) => (map[s.ID] = s, map), {});
   
-    // 2. Filter for this sector and only sponsored
+    // 1. Filter only sponsored jobs in this sector
     const filtered = jobs.filter(j =>
       sponsorshipMap[j.ID] && j.Sector === sector
     );
   
-    // 3. Sort newest sponsorship first
+    // 2. Sort by Sponsorship Start Date descending
     filtered.sort((a, b) =>
       new Date(sponsorshipMap[b.ID]['Sponsorship Start Date'])
-        - new Date(sponsorshipMap[a.ID]['Sponsorship Start Date'])
+      - new Date(sponsorshipMap[a.ID]['Sponsorship Start Date'])
     );
   
-    // 4. Grab the top 4
+    // 3. Take just the top 4
     const topFour = filtered.slice(0, 4);
   
-    // 5. Target your listings container
+    // 4. Clear current listings and render those 4
     const container = document.getElementById('job-listings');
-    if (!container) {
-      console.error('Container #job-listings not found');
-      return;
-    }
-  
-    // — remove only old cards & see-all button, leave header/intros alone
-    container.querySelectorAll('.job-cards, .see-all-button').forEach(el => el.remove());
-  
-    // 6. Render each card
+    container.innerHTML = '';
     topFour.forEach(job => {
       const s = sponsorshipMap[job.ID];
       const card = document.createElement('div');
       card.className = `job-cards sponsored ${s.Category.toLowerCase().replace(/\s+/g, '-')}`;
-  
-      // build the inner HTML without inline onclick
-      card.innerHTML = `
-        <div class="badge">${s.Category}</div>
-        <h3>${job['Job Title'] || 'Not specified'}</h3>
-        <p><strong>Employer:</strong> ${job.Employer || 'Not specified'}</p>
-        ${job.Location  ? `<p><strong>Location:</strong> ${job.Location}</p>`  : ''}
-        ${job['Job Type'] ? `<p><strong>Type:</strong> ${job['Job Type']}</p>` : ''}
-        ${job['Closing Date'] ? `<p><strong>Closing Date:</strong> ${job['Closing Date']}</p>` : ''}
-        <button class="read-more">Read More</button>
-      `;
-  
-      // wire up the click tracker + navigation
-      const btn = card.querySelector('.read-more');
-      btn.addEventListener('click', () => {
-        window.dataLayer = window.dataLayer || [];
-        dataLayer.push({
-          event: 'job_click',
-          job_employer:       job.Employer || 'Unknown',
-          job_sponsored:      true,
-          job_sponsored_type: s.Category.toLowerCase().replace(/\s+/g, '-')
-        });
-        window.open(job['Job URL'], '_blank');
-      });
-  
-      container.appendChild(card);
+          // 1) build your card’s HTML _without_ the inline onclick
+    jobCard.innerHTML += `
+    …
+    <button class="read-more">Read More</button>
+  `;
+
+  // 2) grab that button, wire up Data Layer + open logic
+  const btn = jobCard.querySelector('.read-more');
+  btn.addEventListener('click', () => {
+    window.dataLayer = window.dataLayer || [];
+    dataLayer.push({
+      event: 'job_click',
+      job_employer:       job.Employer,              // e.g. “Uniting Care”
+      job_sponsored:      job.Sponsored === true,    // true / false
+      job_sponsored_type: job.Category || 'none'     // e.g. “top-job”
+    });
+    window.open(jobURL, '_blank');
+  });
+
+  // 3) now append the card
+  jobListingsContainer.appendChild(jobCard);
+
     });
   
-    // 7. Re-add your “See All” button at the bottom
-    const seeAllBtn = document.createElement('button');
-    seeAllBtn.type = 'button';
-    seeAllBtn.className = 'see-all-button';
-    seeAllBtn.textContent = `See All ${sector} Jobs`;
-    seeAllBtn.addEventListener('click', () => {
-      window.location.href = 'index.html';
-    });
-    container.appendChild(seeAllBtn);
+      // 5. Add “See all” button
+  const seeAllBtn = document.createElement('button');
+  seeAllBtn.type = 'button';
+  seeAllBtn.textContent = `See All ${sector} Jobs`;
+  seeAllBtn.className = 'see-all-button';
+  seeAllBtn.addEventListener('click', () => {
+    // navigate back to the main listings
+    window.location.href = 'index.html';
+  });
+  container.appendChild(seeAllBtn);
+
   }
   
 
