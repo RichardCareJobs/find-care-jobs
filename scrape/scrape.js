@@ -29,8 +29,8 @@ const TARGET_URLS = [
 ];
 
 // Paths for CSV files
-const jobsCsvPath = 'C:\\Users\\Maca\\Documents\\find-care-jobs-mvp\\scrape\\job_listings.csv';
-const sponsorshipCsvPath = 'C:\\Users\\Maca\\Documents\\find-care-jobs-mvp\\scrape\\sponsored_jobs.csv';
+const jobsCsvPath = './scrape/job_listings.csv';
+const sponsorshipCsvPath = './scrape/sponsored_jobs.csv';
 
 // Set up CSV writer (for job_listings.csv)
 const jobsCsvWriter = createCsvWriter({

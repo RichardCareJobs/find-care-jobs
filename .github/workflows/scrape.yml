@@ -2,14 +2,15 @@ name: Daily Scrape
 
 on:
   schedule:
-    - cron: '13 13 * * *' # Runs every day at 11:00 AM UTC (midnight Sydney time)
+    - cron: '0 13 * * *' # Runs every day at 13:00 UTC (midnight Sydney time)
+  workflow_dispatch: # Allows manual triggering of the workflow
   push:
     branches:
       - main
 
 jobs:
   scrape:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
 
     steps:
     - name: Checkout repository
@@ -23,6 +24,19 @@ jobs:
     - name: Install dependencies
       run: npm install
       working-directory: ./scrape
+
+    #- name: Create scrape directory
+    #  run: mkdir -p ./scrape  
+
+    - name: Download job_listings.csv
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+          $headers = @{
+          Authorization = "token $env:GITHUB_TOKEN"
+          Accept        = "application/vnd.github.v3.raw"
+          }
+          Invoke-RestMethod -Uri https://api.github.com/repos/paskie-fcj/find-care-jobs/contents/scrape/job_listings.csv -Headers $headers -OutFile "./scrape/job_listings.csv"
 
     - name: Run scrape script
       run: node scrape.js
