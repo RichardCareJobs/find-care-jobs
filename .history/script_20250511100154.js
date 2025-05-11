@@ -29,9 +29,6 @@ fetch('header.html')
     if (el) el.innerHTML = html;
   });
 
- 
-  
-
 // load the same footer into every page
 fetch('footer.html')
   .then(r => r.text())
@@ -234,17 +231,12 @@ async function fetchSponsoredJobsBySector(sector) {
       container.appendChild(card);
     });
   
-      // 5. Add “See all” button
-  const seeAllBtn = document.createElement('button');
-  seeAllBtn.type = 'button';
-  seeAllBtn.textContent = `See All ${sector} Jobs`;
-  seeAllBtn.className = 'see-all-button';
-  seeAllBtn.addEventListener('click', () => {
-    // navigate back to the main listings
-    window.location.href = 'index.html';
-  });
-  container.appendChild(seeAllBtn);
-
+    // 5. Add “See all” link
+    const seeAll = document.createElement('a');
+    seeAll.href = 'index.html';
+    seeAll.textContent = `See All ${sector} Jobs`;
+    seeAll.className = 'see-all-link';
+    container.appendChild(seeAll);
   }
   
 
@@ -257,8 +249,6 @@ async function updateJobCount(count) {
 }
 
 window.addEventListener('scroll', () => {
-    // if we're on a sector page (body[data-sector]), do nothing
-  if (document.body.dataset.sector) return;
     const { scrollTop, scrollHeight, clientHeight } = document.documentElement;
 
     console.log(`ScrollTop: ${scrollTop}, ClientHeight: ${clientHeight}, ScrollHeight: ${scrollHeight}`);

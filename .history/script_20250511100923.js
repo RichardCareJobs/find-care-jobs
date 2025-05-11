@@ -29,9 +29,6 @@ fetch('header.html')
     if (el) el.innerHTML = html;
   });
 
- 
-  
-
 // load the same footer into every page
 fetch('footer.html')
   .then(r => r.text())

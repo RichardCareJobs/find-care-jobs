@@ -29,7 +29,35 @@ fetch('header.html')
     if (el) el.innerHTML = html;
   });
 
- 
+  document.addEventListener('DOMContentLoaded', function () {
+    // …your other init code…
+  
+    // load the same header into every page
+    fetch('header.html')
+      .then(res => res.text())
+      .then(html => {
+        const hdr = document.getElementById('global-header');
+        if (!hdr) return;
+  
+        // inject the shared header HTML
+        hdr.innerHTML = html;
+  
+        // if we’re not on index.html, prepend a “Home” link
+        const currentFile = window.location.pathname.split('/').pop() || 'index.html';
+        if (currentFile !== 'index.html') {
+          const navList = hdr.querySelector('nav ul');
+          if (navList) {
+            const li = document.createElement('li');
+            li.className = 'nav-home';
+            li.innerHTML = '<a href="index.html">Home</a>';
+            navList.insertBefore(li, navList.firstChild);
+          }
+        }
+      });
+  
+    // …the rest of your DOMContentLoaded logic (footer injection, search wiring, etc.)…
+  });
+  
   
 
 // load the same footer into every page

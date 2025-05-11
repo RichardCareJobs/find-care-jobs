@@ -656,5 +656,44 @@ button:hover {
     background-color: var(--accent-color);
 }
 
+/* ——— General See-All button styling ——— */
+.see-all-button {
+  display: inline-block;
+  padding: 0.6rem 1.2rem;
+  background-color: #0088d2;    /* or your brand primary */
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  font-size: 1rem;
+  cursor: pointer;
+  text-align: center;
+  margin: 1rem 0;
+}
+
+/* ——— Center & Span full width on just those sector pages ——— */
+body[data-sector="Aged Care"]   #job-listings .see-all-button,
+body[data-sector="Disability Support"] #job-listings .see-all-button {
+  grid-column: 1 / -1;      /* span both columns */
+  justify-self: center;     /* then center within that span */
+}
+
+
+
+/* ——— Sector Page 2×2 Grid for Top 4 Sponsored Jobs ——— */
+body[data-sector="Aged Care"] #job-listings,
+body[data-sector="Disability Support"] #job-listings {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  grid-auto-rows: auto;
+  gap: 1rem;
+}
+
+body[data-sector="Aged Care"] #job-listings .see-all-link,
+body[data-sector="Disability Support"] #job-listings .see-all-link {
+  grid-column: 1 / -1;
+  text-align: center;
+  margin-top: 1rem;
+  font-weight: bold;
+}
 
 

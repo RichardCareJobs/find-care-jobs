@@ -1,5 +1,17 @@
 document.addEventListener('DOMContentLoaded', function () {
-     
+    // --- your existing header/footer fetches ---
+    fetch('header.html')
+        .then(res => res.text())
+        .then(html => {
+            const hdr = document.getElementById('global-header');
+            if (hdr) hdr.innerHTML = html;
+        });
+    fetch('footer.html')
+        .then(res => res.text())
+        .then(html => {
+            const ftr = document.getElementById('global-footer');
+            if (ftr) ftr.innerHTML = html;
+        });
 
     // initialize
     resetSponsoredJobs();
@@ -14,32 +26,22 @@ document.addEventListener('DOMContentLoaded', function () {
     document.getElementById('search-button').addEventListener('click', handleSearch);
 });
 
+// Toggle mobile menu
+const hamburgerMenu = document.getElementById('hamburger-menu');
+const mobileNav = document.getElementById('mobile-nav');
 
+hamburgerMenu.addEventListener('click', () => {
+    if (mobileNav.style.display === 'flex') {
+        mobileNav.style.display = 'none';
+    } else {
+        mobileNav.style.display = 'flex';
+    }
+});
 
 let currentPage = 0; // Current page of jobs
 const jobsPerPage = 10; // Number of jobs per page
 let preRandomizedJobs = []; // Jobs randomized and ready for pagination
 let usedSponsoredJobs = []; // Track used sponsored jobs
-
-// load the same header into every page
-fetch('header.html')
-  .then(r => r.text())
-  .then(html => {
-    const el = document.getElementById('global-header');
-    if (el) el.innerHTML = html;
-  });
-
- 
-  
-
-// load the same footer into every page
-fetch('footer.html')
-  .then(r => r.text())
-  .then(html => {
-    const el = document.getElementById('global-footer');
-    if (el) el.innerHTML = html;
-  });
-
 
 function resetSponsoredJobs() {
     usedSponsoredJobs = [];
@@ -195,58 +197,31 @@ async function fetchJobListings() {
     displayJobListings(preRandomizedJobs);
 }
 
-// Fetch and show exactly 4 latest sponsored jobs for this sector
+// Fetch Sponsored Jobs by Sector
 async function fetchSponsoredJobsBySector(sector) {
-    const jobs         = await fetchCsv('scrape/job_listings.csv');
+    const jobs = await fetchCsv('scrape/job_listings.csv');
     const sponsorships = await fetchCsv('scrape/sponsored_jobs.csv');
-    const sponsorshipMap = sponsorships.reduce((map, s) => (map[s.ID] = s, map), {});
-  
-    // 1. Filter only sponsored jobs in this sector
-    const filtered = jobs.filter(j =>
-      sponsorshipMap[j.ID] && j.Sector === sector
-    );
-  
-    // 2. Sort by Sponsorship Start Date descending
-    filtered.sort((a, b) =>
-      new Date(sponsorshipMap[b.ID]['Sponsorship Start Date'])
-      - new Date(sponsorshipMap[a.ID]['Sponsorship Start Date'])
-    );
-  
-    // 3. Take just the top 4
-    const topFour = filtered.slice(0, 4);
-  
-    // 4. Clear current listings and render those 4
-    const container = document.getElementById('job-listings');
-    container.innerHTML = '';
-    topFour.forEach(job => {
-      const s = sponsorshipMap[job.ID];
-      const card = document.createElement('div');
-      card.className = `job-cards sponsored ${s.Category.toLowerCase().replace(/\s+/g, '-')}`;
-      card.innerHTML = `
-        <div class="badge">${s.Category}</div>
-        <h3>${job['Job Title'] || 'Not specified'}</h3>
-        <p><strong>Employer:</strong> ${job.Employer || 'Not specified'}</p>
-        ${job.Location  ? `<p><strong>Location:</strong> ${job.Location}</p>`  : ''}
-        ${job['Job Type'] ? `<p><strong>Type:</strong> ${job['Job Type']}</p>` : ''}
-        ${job['Closing Date'] ? `<p><strong>Closing Date:</strong> ${job['Closing Date']}</p>` : ''}
-        <button class="read-more" onclick="window.open('${job['Job URL']}', '_blank')">Read More</button>
-      `;
-      container.appendChild(card);
-    });
-  
-      // 5. Add “See all” button
-  const seeAllBtn = document.createElement('button');
-  seeAllBtn.type = 'button';
-  seeAllBtn.textContent = `See All ${sector} Jobs`;
-  seeAllBtn.className = 'see-all-button';
-  seeAllBtn.addEventListener('click', () => {
-    // navigate back to the main listings
-    window.location.href = 'index.html';
-  });
-  container.appendChild(seeAllBtn);
 
-  }
-  
+    const sponsorshipMap = sponsorships.reduce((map, job) => {
+        map[job.ID] = job; // Map sponsorship data by job ID
+        return map;
+    }, {});
+
+    const enrichedJobs = jobs.map((job) => {
+        const sponsoredData = sponsorshipMap[job.ID];
+        return {
+            ...job,
+            Sponsored: !!sponsoredData,
+            Category: sponsoredData?.Category || '',
+        };
+    });
+
+    const filteredJobs = enrichedJobs.filter(
+        (job) => job.Sponsored && job.Sector === sector
+    );
+    preRandomizedJobs = shuffleArray(filteredJobs);
+    displayJobListings(preRandomizedJobs);
+}
 
 // Update Job Count
 async function updateJobCount(count) {
@@ -257,8 +232,6 @@ async function updateJobCount(count) {
 }
 
 window.addEventListener('scroll', () => {
-    // if we're on a sector page (body[data-sector]), do nothing
-  if (document.body.dataset.sector) return;
     const { scrollTop, scrollHeight, clientHeight } = document.documentElement;
 
     console.log(`ScrollTop: ${scrollTop}, ClientHeight: ${clientHeight}, ScrollHeight: ${scrollHeight}`);
