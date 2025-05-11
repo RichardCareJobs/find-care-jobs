@@ -39,5 +39,5 @@ jobs:
             scrape/job_listings.csv,
             scrape/sponsored_jobs.csv,
             archive/**/*.csv
-          message: chore: automated daily scrape & archive
+          message: 'chore: automated daily scrape & archive'
 
