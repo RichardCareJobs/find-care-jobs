@@ -41,14 +41,7 @@ fetch('header.html')
     if (el) el.innerHTML = html;
   });
 
-  const menuBtn = document.getElementById('hamburger-menu');
-  const mobileNav = document.getElementById('mobile-nav');
-  if (menuBtn && mobileNav) {
-    menuBtn.addEventListener('click', () => {
-      mobileNav.classList.toggle('active');
-    });
-  }
-  
+ 
   
 
 // load the same footer into every page
