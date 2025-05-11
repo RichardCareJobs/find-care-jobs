@@ -131,65 +131,57 @@ async function handleSearch() {
     displayJobListings(preRandomizedJobs);
 }
 
-// Display Job Listings (with click tracking)
+// Display Job Listings
 function displayJobListings(jobs) {
     const jobListingsContainer = document.getElementById('job-listings');
     if (!jobListingsContainer) {
-      console.error('Job listings container not found!');
-      return;
+        console.error('Job listings container not found!');
+        return;
     }
-  
-    // Pull the next page’s worth of jobs, arranged with sponsored slots
+
+    const currentJobs = jobs.slice(currentPage * jobsPerPage, (currentPage + 1) * jobsPerPage);
     const arrangedJobs = arrangeSponsoredJobs(jobs, currentPage, jobsPerPage);
-  
+
     arrangedJobs.forEach((job) => {
-      const jobCard = document.createElement('div');
-      jobCard.className = 'job-cards';
-  
-      // If it’s sponsored, add the badge first
-      const isSponsored = job.Sponsored === true;
-      if (isSponsored) {
-        jobCard.classList.add('sponsored');
-        const category = job.Category || 'Sponsored';
-        jobCard.classList.add(category.toLowerCase().replace(/\s+/g, '-'));
-        jobCard.innerHTML = `<div class="badge">${category}</div>`;
-      } else {
-        // clear any existing innerHTML from a previous sponsored pass
-        jobCard.innerHTML = '';
-      }
-  
-      // Now build the rest of the card
-      jobCard.innerHTML += `
-        <h3>${job['Job Title'] || 'Not specified'}</h3>
-        <p><strong>Employer:</strong> ${job.Employer || 'Not specified'}</p>
-        ${job.Location   ? `<p><strong>Location:</strong> ${job.Location}</p>`   : ''}
-        ${job['Job Type']? `<p><strong>Type:</strong> ${job['Job Type']}</p>`   : ''}
-        ${job['Closing Date'] 
-          ? `<p><strong>Closing Date:</strong> ${job['Closing Date']}</p>` 
-          : ''}
-        <button class="read-more">Read More</button>
-      `;
-  
-      // Wire up our GA4 click-tracking + navigation
-      const btn = jobCard.querySelector('.read-more');
-      btn.addEventListener('click', () => {
-        window.dataLayer = window.dataLayer || [];
-        dataLayer.push({
-          event: 'job_click',
-          job_employer:       job.Employer || 'Unknown',
-          job_sponsored:      isSponsored,
-          job_sponsored_type: (job.Category || 'none').toLowerCase().replace(/\s+/g, '-')
-        });
-        window.open(job['Job URL'], '_blank');
-      });
-  
-      // Finally add the card to the page
-      jobListingsContainer.appendChild(jobCard);
+        const jobCard = document.createElement('div');
+        jobCard.className = 'job-cards';
+
+        const isSponsored = job['Sponsored'] === true;
+        const jobURL = job['Job URL'];
+
+        if (isSponsored) {
+            jobCard.classList.add('sponsored');
+            const category = job['Category'] || 'Sponsored';
+            jobCard.classList.add(category.toLowerCase().replace(/\s+/g, '-')); // Add category-based class
+            jobCard.innerHTML += `<div class="badge">${category}</div>`; // Add category badge
+        }
+
+            // 1) build your card’s HTML _without_ the inline onclick
+    jobCard.innerHTML += `
+    …
+    <button class="read-more">Read More</button>
+  `;
+
+  // 2) grab that button, wire up Data Layer + open logic
+  const btn = jobCard.querySelector('.read-more');
+  btn.addEventListener('click', () => {
+    window.dataLayer = window.dataLayer || [];
+    dataLayer.push({
+      event: 'job_click',
+      job_employer:       job.Employer,              // e.g. “Uniting Care”
+      job_sponsored:      job.Sponsored === true,    // true / false
+      job_sponsored_type: job.Category || 'none'     // e.g. “top-job”
     });
-  
+    window.open(jobURL, '_blank');
+  });
+
+  // 3) now append the card
+  jobListingsContainer.appendChild(jobCard);
+
+    });
+
     currentPage++;
-  }
-  
+}
 
 // Fetch Job Listings
 async function fetchJobListings() {
