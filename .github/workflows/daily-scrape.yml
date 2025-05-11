@@ -2,8 +2,8 @@ name: Daily Job Scrape
 
 on:
   schedule:
-    - cron: '0 0 * * *'       # runs at midnight UTC daily
-  workflow_dispatch:
+    - cron: '0 0 * * *'      # daily at midnight UTC
+  workflow_dispatch:        # ← this line is essential for manual runs
 
 jobs:
   scrape:
