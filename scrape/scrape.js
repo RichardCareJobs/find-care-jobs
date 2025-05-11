@@ -5,9 +5,21 @@ const fs = require('fs');
 const csvParser = require('csv-parser');
 const crypto = require('crypto');
 
+// Helper function to build a paginated URL.
+// It removes any existing "page" parameter and then sets it (along with any extra parameters).
+function buildPaginatedUrl(url, page, extraParams = {}) {
+  const parsedUrl = new URL(url);
+  parsedUrl.searchParams.delete('page');
+  parsedUrl.searchParams.set('page', page);
+  for (const key in extraParams) {
+    parsedUrl.searchParams.set(key, extraParams[key]);
+  }
+  return parsedUrl.toString();
+}
+
 const TARGET_URLS = [
-    { url: 'https://careers.uniting.org/jobs/search?page=1&query=&category_uids%5B%5D=400c8606503e937687a9f8f39aba8f88', employer: 'Uniting Care - Aged Care' },
-    { url: 'https://careers.uniting.org/jobs/search?page=1&query=&category_uids%5B%5D=5b6fd8bdee29e4a5be4b41a9abb42451', employer: 'Uniting Care - Disability Support' },
+    { url: 'https://globalaus242.dayforcehcm.com/CandidatePortal/en-AU/unitingaunsw/Site/UNITINGCCS', employer: 'Uniting Care - Aged Care' },
+    { url: 'https://careers.uniting.org/jobs/search?page=1&query=&category_uids[]=5b6fd8bdee29e4a5be4b41a9abb42451', employer: 'Uniting Care - Disability Support' },
     { url: 'https://careers.hammond.com.au/jobs/search?page=1&query=', employer: 'Hammond Care' },
     { url: 'https://careers.whiddon.com.au/en/listing/', employer: 'Whiddon' },
     { url: 'https://careers.lwb.org.au/en/listing/', employer: 'Life Without Barriers' },
@@ -16,12 +28,11 @@ const TARGET_URLS = [
     { url: 'https://careers.baptistcare.org.au/jobs/search', employer: 'Baptist Care' }
 ];
 
-
 // Paths for CSV files
 const jobsCsvPath = './scrape/job_listings.csv';
 const sponsorshipCsvPath = './scrape/sponsored_jobs.csv';
 
-// Set up CSV writers
+// Set up CSV writer (for job_listings.csv)
 const jobsCsvWriter = createCsvWriter({
     path: jobsCsvPath,
     header: [
@@ -120,49 +131,83 @@ function mergeJobs(existingJobs, scrapedJobs) {
     return finalJobs.filter((job) => scrapedJobIds.has(job.id));
 }
 
-// Scraping functions for each source
+// --------------------
+// Scraping functions
+// --------------------
+
+// Uniting Care - Aged Care
+
 async function scrapeUnitingCareAgedCare(url, employer) {
     let jobListings = [];
     let currentPage = 1;
     let hasMoreJobs = true;
-    const scrapeDate = new Date().toISOString().split('T')[0]; // YYYY-MM-DD format
+    const scrapeDate = new Date().toISOString().split('T')[0];
 
     while (hasMoreJobs) {
-        const response = await axios.get(`${url}&page=${currentPage}`);
-        const html = response.data;
-        const $ = cheerio.load(html);
+        // Build the URL with the current page
+        const paginatedUrl = buildPaginatedUrl(url, currentPage);
+        try {
+            // Fetch the page
+            const response = await axios.get(paginatedUrl, {
+                maxRedirects: 5,
+                headers: {
+                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Safari/537.36'
+                }
+            });
 
-        const jobsOnPage = $('.job-search-results-card');
-        if (jobsOnPage.length === 0) hasMoreJobs = false;
+            const html = response.data;
+            const $ = cheerio.load(html);
 
-        jobsOnPage.each((index, element) => {
-            const jobTitle = $(element).find('.card-title.job-search-results-card-title a').text().trim();
-            const jobURL = $(element).find('.card-title.job-search-results-card-title a').attr('href');
-            const location = $(element).find('.job-component-list.job-component-list-location').text().trim();
-            const jobType = $(element).find('.job-component-list.job-component-list-employment_type').text().trim();
-            const closingDate = $(element).find('.job-component-icon-and-text.job-component-closing-on').text().trim();
+            // New Dayforce-style selector
+            const jobsOnPage = $('.search-result');
+            if (jobsOnPage.length === 0) {
+                hasMoreJobs = false;
+                break;
+            }
 
-            const jobData = {
-                jobTitle,
-                location,
-                sector: 'Aged Care',
-                jobType,
-                closingDate,
-                jobURL,
-                employer,
-                sponsored: 'false', // Default to non-sponsored
-                category: '', // Default to no category
-                scrapeDate
-            };
+            jobsOnPage.each((index, element) => {
+                // Grab title from the link inside .posting-title
+                const jobTitle = $(element).find('.posting-title a').text().trim() || 'Not specified';
+                
+                // Build absolute URL from the link’s href
+                const jobPath = $(element).find('.posting-title a').attr('href');
+                const jobURL = jobPath ? new URL(jobPath, url).href : 'Not specified';
 
-            jobListings.push(jobData);
-        });
+                // The location is typically in .posting-subtitle
+                const location = $(element).find('.posting-subtitle').text().trim() || 'Not specified';
+                
+                // If there's no actual closing date on the page, default to 'Not specified'
+                const closingDate = 'Not specified';
 
-        currentPage++;
+                const jobData = {
+                    jobTitle,
+                    location,
+                    jobType: 'Not specified',
+                    sector: 'Aged Care',  // or 'Disability Support', depending on which Uniting link
+                    closingDate,
+                    jobURL,
+                    employer,
+                    sponsored: 'false',
+                    category: '',
+                    scrapeDate
+                };
+
+                jobListings.push(jobData);
+            });
+
+            currentPage++;
+        } catch (error) {
+            console.error(`Error scraping Uniting (Dayforce) on page ${currentPage}:`, error.message);
+            hasMoreJobs = false;
+        }
     }
 
     return jobListings;
 }
+
+
+// Uniting Care - Disability Support
+
 
 async function scrapeUnitingCareDisabilitySupport(url, employer) {
     let jobListings = [];
@@ -171,12 +216,16 @@ async function scrapeUnitingCareDisabilitySupport(url, employer) {
     const scrapeDate = new Date().toISOString().split('T')[0];
 
     while (hasMoreJobs) {
-        const response = await axios.get(`${url}&page=${currentPage}`);
+        const paginatedUrl = buildPaginatedUrl(url, currentPage);
+        const response = await axios.get(paginatedUrl);
         const html = response.data;
         const $ = cheerio.load(html);
 
         const jobsOnPage = $('.job-search-results-card');
-        if (jobsOnPage.length === 0) hasMoreJobs = false;
+        if (jobsOnPage.length === 0) {
+            hasMoreJobs = false;
+            break;
+        }
 
         jobsOnPage.each((index, element) => {
             const jobTitle = $(element).find('.card-title.job-search-results-card-title a').text().trim();
@@ -200,12 +249,13 @@ async function scrapeUnitingCareDisabilitySupport(url, employer) {
 
             jobListings.push(jobData);
         });
-
         currentPage++;
     }
-
     return jobListings;
 }
+
+// Hammond Care
+
 
 async function scrapeHammondCareJobs(url, employer) {
     let jobListings = [];
@@ -214,18 +264,21 @@ async function scrapeHammondCareJobs(url, employer) {
     const scrapeDate = new Date().toISOString().split('T')[0];
 
     while (hasMoreJobs) {
-        const response = await axios.get(`${url}&page=${currentPage}`);
+        const paginatedUrl = buildPaginatedUrl(url, currentPage);
+        const response = await axios.get(paginatedUrl);
         const html = response.data;
         const $ = cheerio.load(html);
 
         const jobsOnPage = $('.job-search-results-card');
-        if (jobsOnPage.length === 0) hasMoreJobs = false;
+        if (jobsOnPage.length === 0) {
+            hasMoreJobs = false;
+            break;
+        }
 
         jobsOnPage.each((index, element) => {
             const jobTitle = $(element).find('.card-title.job-search-results-card-title a').text().trim();
             const jobURL = $(element).find('.card-title.job-search-results-card-title a').attr('href');
             const location = $(element).find('.job-component-list.job-component-list-location').text().trim();
-            const jobCategory = $(element).find('.job-component-list.job-component-list-category').text().trim();
             const jobType = $(element).find('.job-component-list.job-component-list-employment_type').text().trim();
 
             const jobData = {
@@ -242,13 +295,12 @@ async function scrapeHammondCareJobs(url, employer) {
 
             jobListings.push(jobData);
         });
-
         currentPage++;
     }
-
     return jobListings;
 }
 
+// Whiddon
 async function scrapeWhiddonJobs(url, employer) {
     let jobListings = [];
     let currentPage = 1;
@@ -256,12 +308,16 @@ async function scrapeWhiddonJobs(url, employer) {
     const scrapeDate = new Date().toISOString().split('T')[0];
 
     while (hasMoreJobs) {
-        const response = await axios.get(`${url}?page=${currentPage}`);
+        const paginatedUrl = buildPaginatedUrl(url, currentPage);
+        const response = await axios.get(paginatedUrl);
         const html = response.data;
         const $ = cheerio.load(html);
 
         const jobsOnPage = $('.job-link');
-        if (jobsOnPage.length === 0) hasMoreJobs = false;
+        if (jobsOnPage.length === 0) {
+            hasMoreJobs = false;
+            break;
+        }
 
         jobsOnPage.each((index, element) => {
             const jobTitle = $(element).text().trim() || 'Not specified';
@@ -285,13 +341,12 @@ async function scrapeWhiddonJobs(url, employer) {
 
             jobListings.push(jobData);
         });
-
         currentPage++;
     }
-
     return jobListings;
 }
 
+// Life Without Barriers
 async function scrapeLifeWithoutBarriersJobs(url, employer) {
     let jobListings = [];
     let currentPage = 1;
@@ -299,12 +354,17 @@ async function scrapeLifeWithoutBarriersJobs(url, employer) {
     const scrapeDate = new Date().toISOString().split('T')[0];
 
     while (hasMoreJobs) {
-        const response = await axios.get(`${url}?page=${currentPage}&page-items=20`);
+        // Here we add the extra parameter "page-items" along with "page"
+        const paginatedUrl = buildPaginatedUrl(url, currentPage, { "page-items": "20" });
+        const response = await axios.get(paginatedUrl);
         const html = response.data;
         const $ = cheerio.load(html);
 
         const jobsOnPage = $('.job-link');
-        if (jobsOnPage.length === 0) hasMoreJobs = false;
+        if (jobsOnPage.length === 0) {
+            hasMoreJobs = false;
+            break;
+        }
 
         jobsOnPage.each((index, element) => {
             const jobTitle = $(element).text().trim() || 'Not specified';
@@ -328,13 +388,12 @@ async function scrapeLifeWithoutBarriersJobs(url, employer) {
 
             jobListings.push(jobData);
         });
-
         currentPage++;
     }
-
     return jobListings;
 }
 
+// Lifestyle Solutions
 async function scrapeLifestyleSolutionsJobs(url, employer) {
     let jobListings = [];
     let currentPage = 1;
@@ -342,18 +401,23 @@ async function scrapeLifestyleSolutionsJobs(url, employer) {
     const scrapeDate = new Date().toISOString().split('T')[0];
 
     while (hasMoreJobs) {
-        const response = await axios.get(`${url}?page=${currentPage}`);
+        const paginatedUrl = buildPaginatedUrl(url, currentPage);
+        const response = await axios.get(paginatedUrl);
         const html = response.data;
         const $ = cheerio.load(html);
 
         const jobsOnPage = $('.job-search-results-card');
-        if (jobsOnPage.length === 0) hasMoreJobs = false;
+        if (jobsOnPage.length === 0) {
+            hasMoreJobs = false;
+            break;
+        }
 
         jobsOnPage.each((index, element) => {
             const jobTitle = $(element).find('.card-title.job-search-results-card-title a').text().trim();
-            const jobURL = $(element).find('.card-title.job-search-results-card-title a').attr('href');
+            const jobPath = $(element).find('.card-title.job-search-results-card-title a').attr('href');
+            // Use URL constructor to combine the base and path
+            const jobURL = jobPath ? new URL(jobPath, url).href : 'Not specified';
             const location = $(element).find('.job-component-list.job-component-list-location').text().trim();
-            const jobCategory = $(element).find('.job-component-list.job-component-list-category').text().trim();
             const jobType = $(element).find('.job-component-list.job-component-list-employment_type').text().trim();
 
             const jobData = {
@@ -361,7 +425,7 @@ async function scrapeLifestyleSolutionsJobs(url, employer) {
                 location,
                 sector: 'Disability Support',
                 jobType,
-                jobURL: jobURL ? 'https://careers.lifestylesolutions.org.au' + jobURL : 'Not specified',
+                jobURL,
                 employer,
                 sponsored: 'false',
                 category: '',
@@ -370,13 +434,12 @@ async function scrapeLifestyleSolutionsJobs(url, employer) {
 
             jobListings.push(jobData);
         });
-
         currentPage++;
     }
-
     return jobListings;
 }
 
+// Opal Healthcare
 async function scrapeOpalHealthcareJobs(url, employer) {
     let jobListings = [];
     let currentPage = 1;
@@ -384,27 +447,31 @@ async function scrapeOpalHealthcareJobs(url, employer) {
     const scrapeDate = new Date().toISOString().split('T')[0];
 
     while (hasMoreJobs) {
+        // Use buildPaginatedUrl to set the page parameter
+        const paginatedUrl = buildPaginatedUrl(url, currentPage);
         try {
-            const response = await axios.get(`${url}?page=${currentPage}`, {
-                maxRedirects: 5, // Allow up to 5 redirects
+            const response = await axios.get(paginatedUrl, {
+                maxRedirects: 5,
                 headers: {
                     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Safari/537.36'
                 }
             });
 
-            // Log the final URL after redirects
             console.log(`Final URL after redirects: ${response.request.res.responseUrl}`);
-
             const html = response.data;
             const $ = cheerio.load(html);
 
             const jobsOnPage = $('.search-result');
-            if (jobsOnPage.length === 0) hasMoreJobs = false;
+            if (jobsOnPage.length === 0) {
+                hasMoreJobs = false;
+                break;
+            }
 
             jobsOnPage.each((index, element) => {
                 const jobTitle = $(element).find('.posting-title a').text().trim() || 'Not specified';
                 const jobPath = $(element).find('.posting-title a').attr('href');
-                const jobURL = jobPath ? 'https://globalaus241.dayforcehcm.com' + jobPath : 'Not specified';
+                // Use the provided URL as the base so the correct domain is used
+                const jobURL = jobPath ? new URL(jobPath, url).href : 'Not specified';
                 const location = $(element).find('.posting-subtitle').text().trim() || 'Not specified';
                 const closingDate = 'Not specified';
 
@@ -423,40 +490,41 @@ async function scrapeOpalHealthcareJobs(url, employer) {
 
                 jobListings.push(jobData);
             });
-
             currentPage++;
         } catch (error) {
             console.error(`Error scraping Opal Healthcare jobs on page ${currentPage}:`, error.message);
-            hasMoreJobs = false; // Stop scraping this source if an error occurs
+            hasMoreJobs = false;
         }
     }
-
     return jobListings;
 }
 
+// Baptist Care
 async function scrapeBaptistCareJobs(url, employer) {
     let jobListings = [];
     let currentPage = 1;
-    const scrapeDate = new Date().toISOString().split('T')[0]; // YYYY-MM-DD format
-    let hasMoreJobs = true; // Start with the assumption there are more jobs
+    const scrapeDate = new Date().toISOString().split('T')[0];
+    let hasMoreJobs = true;
 
     while (hasMoreJobs) {
         console.log(`Scraping Baptist Care on page ${currentPage}...`);
+        const paginatedUrl = buildPaginatedUrl(url, currentPage);
         try {
-            const response = await axios.get(`${url}?page=${currentPage}`);
+            const response = await axios.get(paginatedUrl);
             const html = response.data;
             const $ = cheerio.load(html);
 
             const jobsOnPage = $('.job-search-results-card');
-
             if (jobsOnPage.length === 0) {
                 console.log(`No jobs found on page ${currentPage}. Stopping scrape.`);
-                hasMoreJobs = false; // Stop if no jobs are found
+                hasMoreJobs = false;
+                break;
             } else {
                 jobsOnPage.each((index, element) => {
                     const jobTitle = $(element).find('.card-title.job-search-results-card-title').text().trim();
                     const jobPath = $(element).find('.card-title.job-search-results-card-title a').attr('href');
-                    const jobURL = jobPath ? `https://careers.baptistcare.org.au` : 'Not specified';
+                    // Append the jobPath to the base URL correctly.
+                    const jobURL = jobPath ? 'https://careers.baptistcare.org.au' + jobPath : 'Not specified';
                     const location = $(element).find('.job-component-list-location').text().trim() || 'Not specified';
                     const jobType = $(element).find('.job-component-list-employment_type').text().trim() || 'Not specified';
 
@@ -467,28 +535,28 @@ async function scrapeBaptistCareJobs(url, employer) {
                         jobType,
                         jobURL,
                         employer,
-                        sponsored: 'false', // Default to non-sponsored
-                        category: '', // Default to no category
+                        sponsored: 'false',
+                        category: '',
                         scrapeDate,
                     };
 
                     jobListings.push(jobData);
                 });
-
                 console.log(`Scraped ${jobsOnPage.length} jobs on page ${currentPage}.`);
-                currentPage++; // Move to the next page
+                currentPage++;
             }
         } catch (error) {
             console.error(`Error scraping Baptist Care on page ${currentPage}:`, error.message);
-            hasMoreJobs = false; // Stop if an error occurs
+            hasMoreJobs = false;
         }
     }
-
     console.log(`Total jobs scraped from Baptist Care: ${jobListings.length}`);
     return jobListings;
 }
 
+// --------------------
 // Main function
+// --------------------
 (async () => {
     try {
         // Scrape jobs from all sources
@@ -516,4 +584,3 @@ async function scrapeBaptistCareJobs(url, employer) {
         console.error('Error during scraping:', error);
     }
 })();
-
