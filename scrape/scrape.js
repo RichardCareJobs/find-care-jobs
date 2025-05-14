@@ -48,6 +48,17 @@ const jobsCsvWriter = createCsvWriter({
     ]
 });
 
+// Set up CSV writer for sponsored_jobs.csv
+const sponsorshipCsvWriter = createCsvWriter({
+  path: sponsorshipCsvPath,
+  header: [
+    { id: 'id',         title: 'ID' },
+    { id: 'scrapeDate', title: 'scrapeDate' },
+    { id: 'sponsored',  title: 'Sponsored' },
+    { id: 'category',   title: 'Category' }
+  ]
+});
+
 // Function to generate a unique job ID
 function generateJobId(job) {
     const url = job.jobURL?.trim() || 'unknown-url';
@@ -576,10 +587,22 @@ async function scrapeBaptistCareJobs(url, employer) {
         // Merge scraped jobs with existing jobs
         const finalJobs = mergeJobs(existingJobs, scrapedJobs);
 
-        // Write final jobs to CSV
-        await writeJobsToCsv(finalJobs, jobsCsvPath);
+        // 1) Write final jobs to job_listings.csv
+   await writeJobsToCsv(finalJobs, jobsCsvPath);
+   console.log(`Wrote ${finalJobs.length} rows to ${jobsCsvPath}`);
 
-        console.log('Job scraping and update completed.');
+   // 2) Build and write sponsored_jobs.csv
+   const sponsorshipRecords = finalJobs.map(job => ({
+     id:         job.id,
+     scrapeDate: job.scrapeDate,
+     sponsored:  job.sponsored,
+     category:   job.category
+   }));
+   await sponsorshipCsvWriter.writeRecords(sponsorshipRecords);
+   console.log(`Wrote ${sponsorshipRecords.length} rows to ${sponsorshipCsvPath}`);
+
+   console.log('Job & sponsorship CSV update completed.');
+
     } catch (error) {
         console.error('Error during scraping:', error);
     }
