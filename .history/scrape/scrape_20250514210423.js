@@ -18,7 +18,7 @@ function buildPaginatedUrl(url, page, extraParams = {}) {
 }
 
 const TARGET_URLS = [
-    { url: 'https://careers.uniting.org/jobs/search?page=1&query=&category_uids[]=400c8606503e937687a9f8f39aba8f88', employer: 'Uniting Care - Aged Care' },
+    { url: 'https://globalaus242.dayforcehcm.com/CandidatePortal/en-AU/unitingaunsw/Site/UNITINGCCS', employer: 'Uniting Care - Aged Care' },
     { url: 'https://careers.uniting.org/jobs/search?page=1&query=&category_uids[]=5b6fd8bdee29e4a5be4b41a9abb42451', employer: 'Uniting Care - Disability Support' },
     { url: 'https://careers.hammond.com.au/jobs/search?page=1&query=', employer: 'Hammond Care' },
     { url: 'https://careers.whiddon.com.au/en/listing/', employer: 'Whiddon' },
@@ -29,8 +29,8 @@ const TARGET_URLS = [
 ];
 
 // Paths for CSV files
-const jobsCsvPath = 'C:\\Users\\Maca\\Documents\\find-care-jobs-mvp\\scrape\\job_listings.csv';
-const sponsorshipCsvPath = 'C:\\Users\\Maca\\Documents\\find-care-jobs-mvp\\scrape\\sponsored_jobs.csv';
+const jobsCsvPath = './scrape/job_listings.csv';
+const sponsorshipCsvPath = './scrape/sponsored_jobs.csv';
 
 // Set up CSV writer (for job_listings.csv)
 const jobsCsvWriter = createCsvWriter({
@@ -44,9 +44,19 @@ const jobsCsvWriter = createCsvWriter({
         { id: 'closingDate', title: 'Closing Date' },
         { id: 'jobURL', title: 'Job URL' },
         { id: 'employer', title: 'Employer' },
-        { id: 'employerLogo', title: 'Employer Logo' },
         { id: 'scrapeDate', title: 'Scrape Date' }
     ]
+});
+
+// Set up CSV writer for sponsored_jobs.csv
+const sponsorshipCsvWriter = createCsvWriter({
+  path: sponsorshipCsvPath,
+  header: [
+    { id: 'id',         title: 'ID' },
+    { id: 'scrapeDate', title: 'scrapeDate' },
+    { id: 'sponsored',  title: 'Sponsored' },
+    { id: 'category',   title: 'Category' }
+  ]
 });
 
 // Function to generate a unique job ID
@@ -137,12 +147,6 @@ function mergeJobs(existingJobs, scrapedJobs) {
 // --------------------
 
 // Uniting Care - Aged Care
-// At the start of your scraping function (e.g., inside scrapeSomeSourceJobs)
-const employerLogoUnitingAC = $('#company-logo').attr('src') || '';
-let absoluteLogoUnitingAC = employerLogoUnitingAC;
-if (employerLogoUnitingAC && !employerLogoUnitingAC.startsWith('http')) {
-  absoluteLogoUnitingAC = new URL(employerLogoUnitingAC, url).href;
-}
 
 async function scrapeUnitingCareAgedCare(url, employer) {
     let jobListings = [];
@@ -151,52 +155,70 @@ async function scrapeUnitingCareAgedCare(url, employer) {
     const scrapeDate = new Date().toISOString().split('T')[0];
 
     while (hasMoreJobs) {
+        // Build the URL with the current page
         const paginatedUrl = buildPaginatedUrl(url, currentPage);
-        const response = await axios.get(paginatedUrl);
-        const html = response.data;
-        const $ = cheerio.load(html);
+        try {
+            // Fetch the page
+            const response = await axios.get(paginatedUrl, {
+                maxRedirects: 5,
+                headers: {
+                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Safari/537.36'
+                }
+            });
 
-        const jobsOnPage = $('.job-search-results-card');
-        if (jobsOnPage.length === 0) {
+            const html = response.data;
+            const $ = cheerio.load(html);
+
+            // New Dayforce-style selector
+            const jobsOnPage = $('.search-result');
+            if (jobsOnPage.length === 0) {
+                hasMoreJobs = false;
+                break;
+            }
+
+            jobsOnPage.each((index, element) => {
+                // Grab title from the link inside .posting-title
+                const jobTitle = $(element).find('.posting-title a').text().trim() || 'Not specified';
+                
+                // Build absolute URL from the link’s href
+                const jobPath = $(element).find('.posting-title a').attr('href');
+                const jobURL = jobPath ? new URL(jobPath, url).href : 'Not specified';
+
+                // The location is typically in .posting-subtitle
+                const location = $(element).find('.posting-subtitle').text().trim() || 'Not specified';
+                
+                // If there's no actual closing date on the page, default to 'Not specified'
+                const closingDate = 'Not specified';
+
+                const jobData = {
+                    jobTitle,
+                    location,
+                    jobType: 'Not specified',
+                    sector: 'Aged Care',  // or 'Disability Support', depending on which Uniting link
+                    closingDate,
+                    jobURL,
+                    employer,
+                    sponsored: 'false',
+                    category: '',
+                    scrapeDate
+                };
+
+                jobListings.push(jobData);
+            });
+
+            currentPage++;
+        } catch (error) {
+            console.error(`Error scraping Uniting (Dayforce) on page ${currentPage}:`, error.message);
             hasMoreJobs = false;
-            break;
         }
-
-        jobsOnPage.each((index, element) => {
-            const jobTitle = $(element).find('.card-title.job-search-results-card-title a').text().trim();
-            const jobURL = $(element).find('.card-title.job-search-results-card-title a').attr('href');
-            const location = $(element).find('.job-component-list.job-component-list-location').text().trim();
-            const jobType = $(element).find('.job-component-list.job-component-list-employment_type').text().trim();
-            const closingDate = $(element).find('.job-component-icon-and-text.job-component-closing-on').text().trim();
-
-            const jobData = {
-                jobTitle,
-                location,
-                sector: 'Aged Care',
-                jobType,
-                closingDate,
-                jobURL,
-                employer,
-                employerLogoUnitingAC: absoluteLogo, // assign the global logo URL
-                sponsored: 'false',
-                category: '',
-                scrapeDate
-            };
-
-            jobListings.push(jobData);
-        });
-        currentPage++;
     }
+
     return jobListings;
 }
 
+
 // Uniting Care - Disability Support
-// At the start of your scraping function (e.g., inside scrapeSomeSourceJobs)
-const employerLogoUnitingDS = $('#company-logo').attr('src') || '';
-let absoluteLogoUnitingDS = employerLogoUnitingDS;
-if (employerLogoUnitingDS && !employerLogoUnitingDS.startsWith('http')) {
-  absoluteLogoUnitingDS = new URL(employerLogoUnitingDS, url).href;
-}
+
 
 async function scrapeUnitingCareDisabilitySupport(url, employer) {
     let jobListings = [];
@@ -231,7 +253,6 @@ async function scrapeUnitingCareDisabilitySupport(url, employer) {
                 closingDate,
                 jobURL,
                 employer,
-                employerLogoUnitingDS: absoluteLogo, // assign the global logo URL
                 sponsored: 'false',
                 category: '',
                 scrapeDate
@@ -245,12 +266,7 @@ async function scrapeUnitingCareDisabilitySupport(url, employer) {
 }
 
 // Hammond Care
-// Grab the global logo using the class .nav_logo
-const employerLogoHammond = $('.nav_logo').attr('src') || '';
-let absoluteLogoHammond = employerLogoHammond;
-if (employerLogoHammond && !employerLogoHammond.startsWith('http')) {
-  absoluteLogoHammond = new URL(employerLogoHammond, url).href;
-}
+
 
 async function scrapeHammondCareJobs(url, employer) {
     let jobListings = [];
@@ -283,7 +299,6 @@ async function scrapeHammondCareJobs(url, employer) {
                 jobType,
                 jobURL,
                 employer,
-                employerLogoHammond: absoluteLogo, // assign the global logo URL
                 sponsored: 'false',
                 category: '',
                 scrapeDate
@@ -572,10 +587,22 @@ async function scrapeBaptistCareJobs(url, employer) {
         // Merge scraped jobs with existing jobs
         const finalJobs = mergeJobs(existingJobs, scrapedJobs);
 
-        // Write final jobs to CSV
-        await writeJobsToCsv(finalJobs, jobsCsvPath);
+        // 1) Write final jobs to job_listings.csv
+   await writeJobsToCsv(finalJobs, jobsCsvPath);
+   console.log(`Wrote ${finalJobs.length} rows to ${jobsCsvPath}`);
 
-        console.log('Job scraping and update completed.');
+   // 2) Build and write sponsored_jobs.csv
+   const sponsorshipRecords = finalJobs.map(job => ({
+     id:         job.id,
+     scrapeDate: job.scrapeDate,
+     sponsored:  job.sponsored,
+     category:   job.category
+   }));
+   await sponsorshipCsvWriter.writeRecords(sponsorshipRecords);
+   console.log(`Wrote ${sponsorshipRecords.length} rows to ${sponsorshipCsvPath}`);
+
+   console.log('Job & sponsorship CSV update completed.');
+
     } catch (error) {
         console.error('Error during scraping:', error);
     }
