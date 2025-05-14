@@ -70,7 +70,7 @@ const sponsorshipCsvWriter = createCsvWriter({
     { id: 'scrapeDate', title: 'scrapeDate' },
     { id: 'sponsored',  title: 'Sponsored' },
     { id: 'category',   title: 'Category' },
-    { id: 'sponsorDate',   title: 'sponsorDate' }
+    { id: 'sponsoredDate',   title: 'sponsoredDate' }
   ]
 });
 
@@ -647,8 +647,7 @@ const sponsorshipRecords = finalJobs
     id:         job.id,
     scrapeDate: job.scrapeDate,
     sponsored:  job.sponsored,
-    category:   job.category,
-    sponsorDate:  job.sponsorDate
+    category:   job.category
   }));
 
    await sponsorshipCsvWriter.writeRecords(sponsorshipRecords);

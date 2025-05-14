@@ -647,8 +647,7 @@ const sponsorshipRecords = finalJobs
     id:         job.id,
     scrapeDate: job.scrapeDate,
     sponsored:  job.sponsored,
-    category:   job.category,
-    sponsorDate:  job.sponsorDate
+    category:   job.category
   }));
 
    await sponsorshipCsvWriter.writeRecords(sponsorshipRecords);

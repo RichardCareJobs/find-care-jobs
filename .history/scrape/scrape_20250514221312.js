@@ -5,20 +5,6 @@ const fs = require('fs');
 const csvParser = require('csv-parser');
 const crypto = require('crypto');
 
-/**
- * Shuffle an array *in place* using Fisher–Yates.
- * @param {any[]} array
- */
-function shuffle(array) {
-  for (let i = array.length - 1; i > 0; i--) {
-    // pick a random index from 0 to i
-    const j = Math.floor(Math.random() * (i + 1));
-    // swap arr[i] and arr[j]
-    [array[i], array[j]] = [array[j], array[i]];
-  }
-}
-
-
 // Helper function to build a paginated URL.
 // It removes any existing "page" parameter and then sets it (along with any extra parameters).
 function buildPaginatedUrl(url, page, extraParams = {}) {
@@ -69,8 +55,8 @@ const sponsorshipCsvWriter = createCsvWriter({
     { id: 'id',         title: 'ID' },
     { id: 'scrapeDate', title: 'scrapeDate' },
     { id: 'sponsored',  title: 'Sponsored' },
-    { id: 'category',   title: 'Category' },
-    { id: 'sponsorDate',   title: 'sponsorDate' }
+    { id: 'category',   title: 'Category' }
+    { id: 'sponsoredDate',   title: 'sponsoredDate' }
   ]
 });
 
@@ -647,8 +633,7 @@ const sponsorshipRecords = finalJobs
     id:         job.id,
     scrapeDate: job.scrapeDate,
     sponsored:  job.sponsored,
-    category:   job.category,
-    sponsorDate:  job.sponsorDate
+    category:   job.category
   }));
 
    await sponsorshipCsvWriter.writeRecords(sponsorshipRecords);

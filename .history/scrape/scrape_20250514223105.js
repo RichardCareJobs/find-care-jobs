@@ -647,7 +647,7 @@ const sponsorshipRecords = finalJobs
     id:         job.id,
     scrapeDate: job.scrapeDate,
     sponsored:  job.sponsored,
-    category:   job.category,
+    category:   job.category
     sponsorDate:  job.sponsorDate
   }));
 
