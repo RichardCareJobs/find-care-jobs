@@ -1,17 +1,24 @@
+# .github/workflows/daily-scrape.yml
 name: Daily Job Scrape
+
+permissions:
+  contents: write    # ⇦ allow push of updated CSVs
+
 on:
   schedule:
-    - cron: 0 0 * * *
-  workflow_dispatch: null
+    - cron: '0 0 * * *'
+  workflow_dispatch:
+
 jobs:
   scrape:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
-          persist-credentials: true
+          persist-credentials: true   # ⇦ this makes GITHUB_TOKEN available to push
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
@@ -39,10 +46,14 @@ jobs:
           cp scrape/job_listings.csv  archive/job_listings_${TIMESTAMP}.csv
 
           cp scrape/sponsored_jobs.csv archive/sponsored_jobs_${TIMESTAMP}.csv || echo "no sponsored file"
+
+          
       - name: Commit updated + archived CSVs
         uses: EndBug/add-and-commit@v9
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}   # ⇦ ensure the token is injected
         with:
           add: "scrape/job_listings.csv scrape/sponsored_jobs.csv archive/*.csv"
-          commit: "--allow-empty"      # optional, to force a commit even if nothing changed
+          commit: "--allow-empty"                     # optional
           message: "chore: automated daily scrape & archive"
 
