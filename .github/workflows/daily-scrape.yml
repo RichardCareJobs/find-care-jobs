@@ -42,8 +42,9 @@ jobs:
       - name: Commit updated + archived CSVs
         uses: EndBug/add-and-commit@v9
         with:
-          add: |
-            scrape/job_listings.csv
-            scrape/sponsored_jobs.csv
-            archive/*.csv
+          # comma-separated list, in one line:
+          add: "scrape/job_listings.csv,scrape/sponsored_jobs.csv,archive/*.csv"
+          # (optional) force a commit even if nothing changed:
+          # commit: "--allow-empty"
           message: "chore: automated daily scrape & archive"
+
