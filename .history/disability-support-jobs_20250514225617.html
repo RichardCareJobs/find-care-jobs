@@ -12,8 +12,12 @@
 
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Disability Support Jobs</title>
+    <title>Disability Support Jobs Australia | Support Worker Roles</title>
+  <meta name="description"
+        content="Find the latest disability support vacancies across Australia. Browse caregiver, support worker and allied health roles—search and apply today.">
     <link rel="stylesheet" href="styles.css">
+    <!-- Include PapaParse library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
 </head>
 
 <body data-sector="Disability Support">
@@ -31,7 +35,7 @@
 
     <!-- Page Content -->
     <main>
-        <h1>About Find Care Jobs</h1>
+        <h1>Find Disability Support Jobs</h1>
         <h2>Your dedicated resource to find the latest and best aged care, disability support, and associated roles right across Australia.</h2>
         <div class="page-content">
             <div class="image-placeholder">
@@ -48,6 +52,9 @@
 
             </div>
         </div>
+
+        <!-- Add this container for the job listings -->
+        <div id="job-listings" class="job-listings"></div>
     </main>
 
     <div id="global-footer"></div>
