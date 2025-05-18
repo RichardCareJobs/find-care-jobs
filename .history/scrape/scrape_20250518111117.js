@@ -597,13 +597,10 @@ async function scrapeBaptistCareJobs(url, employer) {
         scrapedJobs = scrapedJobs.concat(await scrapeBaptistCareJobs(TARGET_URLS[7].url, TARGET_URLS[7].employer));
 
         // count the number of jobs scraped
-        console.log(`Found ${scrapedJobs.length} jobs scraped in total.`)
+        console.log(`🕵️‍♀️ Found ${scrapedJobs.length} jobs scraped in total.`)
         
         // 1) Load existing jobs
         const existingJobs = await loadExistingJobs(jobsCsvPath);
-
-        // cound the number of existing jobs
-        console.log(`Loaded ${existingJobs.length} existing jobs from CSV.`);
 
         // 2) Merge scraped jobs with existing jobs
         const finalJobs = mergeJobs(existingJobs, scrapedJobs);
