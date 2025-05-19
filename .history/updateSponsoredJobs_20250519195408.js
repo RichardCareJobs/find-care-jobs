@@ -41,10 +41,23 @@ function updateSponsoredJobs(jobListings, sponsoredJobs, desiredCount = 100) {
   // Create a set of valid job IDs from job listings
   const jobIds = new Set(jobListings.map(job => job.ID));
 
-  // Remove sponsored jobs that are older than 30 days or no longer in job listings
-  let updatedSponsored = sponsoredJobs.filter(job => {
-    return !isOlderThan30Days(job.scrapeDate) && jobIds.has(job.ID);
-  });
+// new: filter out old/expired, then “fix” any bad Category entries
+  let updatedSponsored = sponsoredJobs
+    .filter(job => !isOlderThan30Days(job.scrapeDate) && jobIds.has(job.ID))
+    .map(job => {
+      // if job.Category is already one of our valid labels, keep it,
+      // otherwise assign a fresh randomCategory right here
+      const cat = categories.includes(job.Category)
+        ? job.Category.trim()
+        : getRandomCategory();
+
+      return {
+        ...job,
+        Sponsored: 'true',    // keep the sponsored‐flag
+        Category: cat,        // now guaranteed to be a real label
+        // leave job.scrapeDate as-is for existing rows
+      };
+    });
 
   // Gather IDs already in the updated list
   const currentSponsoredIds = new Set(updatedSponsored.map(job => job.ID));
@@ -59,24 +72,24 @@ function updateSponsoredJobs(jobListings, sponsoredJobs, desiredCount = 100) {
 
   const categories = ['Top Job', 'Featured Job', 'Urgent Job', 'Popular Job'];
 
-function getRandomCategory() {
-  return categories[Math.floor(Math.random() * categories.length)];
-}
+  function getRandomCategory() {
+    return categories[Math.floor(Math.random() * categories.length)];
+  }
 
+  // If we don't have enough sponsored jobs, add new ones from available jobs
+  while (updatedSponsored.length < desiredCount && availableJobs.length > 0) {
+    const job = availableJobs.pop();
+    const randomCategory = getRandomCategory();
+    console.log(`Assigning category: ${randomCategory} for job: ${job.jobTitle}`);
+    updatedSponsored.push({
+      ...job,
+      Sponsored: 'true',
+      Category: randomCategory,
+      scrapeDate: new Date().toISOString().split('T')[0]
+    });
+  }
 
-// If we don't have enough sponsored jobs, add new ones from available jobs
-while (updatedSponsored.length < desiredCount && availableJobs.length > 100) {
-  const job = availableJobs.pop();
-  updatedSponsored.push({
-    ...job,
-    Sponsored: 'true',
-    Category: getRandomCategory(),  // Assign a random category here
-    scrapeDate: new Date().toISOString().split('T')[0]
-  });
-}
-
-return updatedSponsored;
-
+  return updatedSponsored;
 }
 
 async function main() {
@@ -85,7 +98,7 @@ async function main() {
     const jobListings = await loadCsv(JOB_LISTINGS_PATH);
     const sponsoredJobs = await loadCsv(SPONSORED_JOBS_PATH);
 
-    // Update sponsored jobs (here, we desire to maintain 10 sponsored jobs)
+    // Update sponsored jobs (here, we desire to maintain 100 sponsored jobs)
     const updatedSponsoredJobs = updateSponsoredJobs(jobListings, sponsoredJobs, 100);
 
     // Define CSV header format (make sure it matches your CSV column names)
