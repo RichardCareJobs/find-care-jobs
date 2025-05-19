@@ -477,29 +477,35 @@ header nav a:hover {
 }
 
 
-.job-cards.sponsored .badge {
-  position: relative;
-  top: 10px;
-  left: 10px;
+.job-cards {
+  position: relative;    /* ensure .badge is positioned relative to the card */
+}
 
-  /* allow text to show */
+.job-cards.sponsored .badge {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+
   display: inline-block;
-  padding: 4px 8px;
+  padding: 2px 6px;
   min-width: 40px;
-  height: auto;      /* remove the fixed height */
-  background-color: #FF6F61; /* Soft Coral for badge background */
+  height: auto;          /* remove the fixed height */
+  background: #FF6F61;   /* default, overridden per category below */
   color: #fff;
   font-size: 0.75rem;
+  line-height: 1;
   border-radius: 3px;
   text-transform: uppercase;
   white-space: nowrap;
+  overflow: visible;     /* ensure text isn’t clipped */
 }
 
-/* category-specific overrides */
-.job-cards.sponsored.top-job .badge       { background: #FF6F61; }
-.job-cards.sponsored.featured-job .badge { background: #FFD700; }
-.job-cards.sponsored.urgent-job .badge   { background: #E60000; }
-.job-cards.sponsored.popular-job .badge  { background: #00B300; }
+/* now your per-category colours will apply: */
+.job-cards.sponsored.top-job       .badge { background: #FF6F61; }
+.job-cards.sponsored.featured-job  .badge { background: #FFD700; color: #000; }
+.job-cards.sponsored.urgent-job    .badge { background: #E60000; }
+.job-cards.sponsored.popular-job   .badge { background: #00B300; }
+
 
 
 /* Styling for the badge */
