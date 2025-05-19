@@ -721,8 +721,18 @@ body[data-sector="Disability Support"] #job-listings .see-all-link {
   padding: 1rem 0;
 }
 
-main.content {
-  padding-top: 100px; /* or adjust based on header height */
+.advice-card {
+  border-bottom: 1px solid #ccc;
+  padding-bottom: 1rem;
+}
+
+.advice-card h2 {
+  margin-bottom: 0.3rem;
+}
+
+.advice-date {
+  font-size: 0.9rem;
+  color: #666;
 }
 
 
