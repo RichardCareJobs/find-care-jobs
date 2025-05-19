@@ -358,18 +358,20 @@ function injectJobPostingSchema(jobs) {
     "item": {
       "@type": "JobPosting",
       // ← use the actual keys from your console.log output here:
-      "title":               jobTitle,
-      "validThrough":        closingDate,       // only include if it exists & is ISO format
-      "employmentType":      jobType?.toUpperCase() || "FULL_TIME",
+      "title":               job.Title,
+      "description":         job.Description || job.Summary || job.Title,
+      "datePosted":          job.DatePosted,
+      "validThrough":        job.ClosingDate,       // only include if it exists & is ISO format
+      "employmentType":      job.Type?.toUpperCase() || "FULL_TIME",
       "hiringOrganization": {
         "@type": "Organization",
-        "name":               employer
+        "name":               job.Employer
       },
       "jobLocation": {
         "@type": "Place",
         "address": {
           "@type": "PostalAddress",
-          "addressLocality":   location,
+          "addressLocality":   job.Location,
           // If you have Region or State in a separate field, use that:
           "addressRegion":     job.Region || "NSW",
           "addressCountry":    "AU"

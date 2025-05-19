@@ -369,7 +369,7 @@ function injectJobPostingSchema(jobs) {
         "@type": "Place",
         "address": {
           "@type": "PostalAddress",
-          "addressLocality":   location,
+          "addressLocality":   job.Location,
           // If you have Region or State in a separate field, use that:
           "addressRegion":     job.Region || "NSW",
           "addressCountry":    "AU"
