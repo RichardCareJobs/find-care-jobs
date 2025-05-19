@@ -348,7 +348,7 @@ window.addEventListener('scroll', () => {
     }
   });
 
-  /**
+ /**
  * Build and append a JSON-LD <script> for all the jobs on the page
  */
 function injectJobPostingSchema(jobs) {
@@ -357,25 +357,27 @@ function injectJobPostingSchema(jobs) {
     "position": idx + 1,
     "item": {
       "@type": "JobPosting",
-      "title": job['Job Title'],
-      "description": job['Summary'] || job['Job Title'],
-      "datePosted": job['DatePosted'],         // e.g. "2025-05-18"
-      "validThrough": job['Closing Date'],     // e.g. "2025-06-18"
-      "employmentType": (job['Job Type'] || "FULL_TIME").toUpperCase(),
+      // ← use the actual keys from your console.log output here:
+      "title":               job.Title,
+      "description":         job.Description || job.Summary || job.Title,
+      "datePosted":          job.DatePosted,
+      "validThrough":        job.ClosingDate,       // only include if it exists & is ISO format
+      "employmentType":      job.Type?.toUpperCase() || "FULL_TIME",
       "hiringOrganization": {
         "@type": "Organization",
-        "name": job['Employer']
+        "name":               job.Employer
       },
       "jobLocation": {
         "@type": "Place",
         "address": {
           "@type": "PostalAddress",
-          "addressLocality": job['Location'] || "",
-          "addressRegion": "NSW",
-          "addressCountry": "AU"
+          "addressLocality":   job.Location,
+          // If you have Region or State in a separate field, use that:
+          "addressRegion":     job.Region || "NSW",
+          "addressCountry":    "AU"
         }
       },
-      "url": job['Job URL']
+      "url":                 job.URL
     }
   }));
 
@@ -390,5 +392,6 @@ function injectJobPostingSchema(jobs) {
   script.textContent = JSON.stringify(schema, null, 2);
   document.head.appendChild(script);
 }
+
 
   
