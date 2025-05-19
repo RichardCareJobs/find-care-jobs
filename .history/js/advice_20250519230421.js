@@ -4,6 +4,9 @@ document.addEventListener("DOMContentLoaded", () => {
     .then(posts => {
       const container = document.getElementById("advice-container");
 
+ // Sort by most recent
+  posts.sort((a, b) => new Date(b.date) - new Date(a.date));
+
   // Sort by most recent
   posts.sort((a, b) => new Date(b.date) - new Date(a.date));  
       posts.forEach(post => {
