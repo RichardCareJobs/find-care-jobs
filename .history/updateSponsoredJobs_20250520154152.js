@@ -16,11 +16,6 @@ const SPONSORED_JOBS_PATH = 'C:\\Users\\Maca\\Documents\\find-care-jobs-mvp\\scr
 // Helper: Read CSV file and return array of objects
 function loadCsv(filePath) {
   const rows = [];
-    // ✅ Return empty list if file doesn't exist
-  if (!fs.existsSync(filePath)) {
-    console.warn(`Warning: File not found – ${filePath}. Continuing with empty data.`);
-    return Promise.resolve([]);
-  }
   return new Promise((resolve, reject) => {
     fs.createReadStream(filePath)
       .pipe(csvParser())
