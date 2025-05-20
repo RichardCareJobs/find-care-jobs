@@ -796,28 +796,6 @@ main {
   gap: 20px;
 }
 
-/* Mobile default: stack */
-.image-column,
-.text-column {
-  flex: 1 1 100%;
-}
-
-/* Desktop: image left, text right */
-@media (min-width: 768px) {
-  .image-column {
-    flex: 0 0 400px;  /* fixed width for image column */
-  }
-
-  .text-column {
-    flex: 1;
-  }
-
-  .content-container {
-    align-items: flex-start;
-  }
-}
-
-
 .image-column,
 .text-column {
   flex: 1 1 100%;
@@ -896,40 +874,5 @@ body[data-sector="Disability Support"] #job-listings .job-cards {
 
   .text-column {
     flex: 1 1 60%;
-  }
-}
-
-/* Ensure headings span full width */
-.full-width-heading {
-  width: 100%;
-  margin-bottom: 1.5rem;
-}
-
-/* Side-by-side image and copy container */
-.two-column-section {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 20px;
-  align-items: flex-start;
-}
-
-/* Image on left, text on right (desktop) */
-.image-column {
-  flex: 0 0 400px;
-}
-
-.text-column {
-  flex: 1;
-}
-
-/* Stack layout for mobile */
-@media (max-width: 768px) {
-  .two-column-section {
-    flex-direction: column;
-  }
-
-  .image-column,
-  .text-column {
-    flex: 1 1 100%;
   }
 }
