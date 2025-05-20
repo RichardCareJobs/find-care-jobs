@@ -1,3 +1,4 @@
+document.addEventListener('DOMContentLoaded', () => {
 async function init() {
   try {
     // 1. Load header
@@ -35,37 +36,11 @@ async function init() {
     console.error('Error during init:', err);
   }
 }
-
-document.addEventListener('DOMContentLoaded', init);
-
-
- function bindHamburgerMenu() {
-  const menuBtn = document.getElementById('hamburger-menu');
-  const mobileNav = document.getElementById('mobile-nav');
-
-  // Avoid re-binding if already done
-  if (menuBtn && mobileNav && !menuBtn.hasListener) {
-    menuBtn.addEventListener('click', () => {
-      console.log('Hamburger clicked');
-      mobileNav.classList.toggle('active');
-    });
-    menuBtn.hasListener = true; // Prevent duplicate binding
-  }
-}
-
  
 let currentPage = 0; // Current page of jobs
 const jobsPerPage = 10; // Number of jobs per page
 let preRandomizedJobs = []; // Jobs randomized and ready for pagination
 let usedSponsoredJobs = []; // Track used sponsored jobs
-
-// load the same footer into every page
-fetch('footer.html')
-  .then(r => r.text())
-  .then(html => {
-    const el = document.getElementById('global-footer');
-    if (el) el.innerHTML = html;
-  });
 
 
 function resetSponsoredJobs() {
@@ -403,4 +378,4 @@ function injectJobPostingSchema(jobs) {
   script.type = "application/ld+json";
   script.textContent = JSON.stringify(schema, null, 2);
   document.head.appendChild(script);
-}
+}})

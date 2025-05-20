@@ -1,43 +1,17 @@
-async function init() {
-  try {
-    // 1. Load header
-    const headerResponse = await fetch('header.html');
-    const headerHtml = await headerResponse.text();
-    const headerContainer = document.getElementById('global-header');
-    if (headerContainer) {
-      headerContainer.innerHTML = headerHtml;
-      bindHamburgerMenu();
-    }
-
-    // 2. Load footer
-    const footerResponse = await fetch('footer.html');
-    const footerHtml = await footerResponse.text();
-    const footerContainer = document.getElementById('global-footer');
-    if (footerContainer) {
-      footerContainer.innerHTML = footerHtml;
-    }
-
-    // 3. Once header/footer are in place, run the app
-    resetSponsoredJobs();
-    const sector = document.body.getAttribute('data-sector');
-    if (sector && sector.trim()) {
-      fetchSponsoredJobsBySector(sector);
-    } else {
-      fetchJobListings();
-    }
-
-    // 4. Wire search button
-    const searchBtn = document.getElementById('search-button');
-    if (searchBtn) {
-      searchBtn.addEventListener('click', handleSearch);
-    }
-  } catch (err) {
-    console.error('Error during init:', err);
-  }
-}
-
-document.addEventListener('DOMContentLoaded', init);
-
+document.addEventListener('DOMContentLoaded', () => {
+    // initialize
+     resetSponsoredJobs();
+     const sector = document.body.getAttribute('data-sector');
+     if (sector && sector.trim()) {
+         fetchSponsoredJobsBySector(sector);
+     } else {
+         fetchJobListings();
+     }
+    
+ 
+     // wire up the Search button
+     document.getElementById('search-button').addEventListener('click', handleSearch);
+ });
 
  function bindHamburgerMenu() {
   const menuBtn = document.getElementById('hamburger-menu');
@@ -46,7 +20,6 @@ document.addEventListener('DOMContentLoaded', init);
   // Avoid re-binding if already done
   if (menuBtn && mobileNav && !menuBtn.hasListener) {
     menuBtn.addEventListener('click', () => {
-      console.log('Hamburger clicked');
       mobileNav.classList.toggle('active');
     });
     menuBtn.hasListener = true; // Prevent duplicate binding
@@ -58,6 +31,10 @@ let currentPage = 0; // Current page of jobs
 const jobsPerPage = 10; // Number of jobs per page
 let preRandomizedJobs = []; // Jobs randomized and ready for pagination
 let usedSponsoredJobs = []; // Track used sponsored jobs
+
+
+
+
 
 // load the same footer into every page
 fetch('footer.html')

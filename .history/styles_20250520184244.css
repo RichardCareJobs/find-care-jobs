@@ -97,53 +97,47 @@ header.header-container {
   }
   
   /* Hamburger menu icon – hidden on desktop */
-.hamburger-menu {
-  display: none;
-  color: #fff;
-  font-size: 28px;
-  cursor: pointer;
-  z-index: 10001; /* Ensure it's clickable above menu */
-}
-
-/* Mobile navigation menu – hidden by default */
-.mobile-nav {
-  display: none;
-  flex-direction: column;
-  background-color: #4E8A8B;
-  position: fixed;
-  top: 80px; /* Height of fixed header */
-  left: 0;
-  width: 100%;
-  padding: 10px 0;
-  box-sizing: border-box;
-  z-index: 10000; /* Just below hamburger but above rest of page */
-}
-
-/* Show mobile menu when .active is applied */
-.mobile-nav.active {
-  display: flex !important;
-}
-
-/* Style for mobile nav links */
-.mobile-nav a {
-  color: #fff;
-  padding: 12px 20px;
-  text-decoration: none;
-  border-bottom: 1px solid #fff;
-  font-size: 16px;
-}
-
-/* Media query: On screens 768px and below */
-@media (max-width: 768px) {
-  .nav-links {
-    display: none;
-  }
-
   .hamburger-menu {
-    display: block;
+    display: none; /* Show only on mobile */
+    color: #fff;
+    font-size: 24px;
+    cursor: pointer;
   }
+  
+  /* Mobile navigation menu – hidden by default */
+  .mobile-nav {
+    display: none;
+    flex-direction: column;
+    background-color: #4E8A8B;
+    position: absolute;
+    top: 60px; /* Immediately below the header */
+    left: 0;
+    width: 100%;
+    box-sizing: border-box;
+    z-index: 9999; /* Ensures mobile menu appears above other content */
+  }
+  /* Show mobile menu when .active is applied */
+.mobile-nav.active {
+  display: flex !important; /* Override default display */
 }
 
+  
+  .mobile-nav a {
+    color: #fff;
+    padding: 10px 20px;
+    text-decoration: none;
+    border-bottom: 1px solid #fff;
+  }
+  
+  /* Media query: On screens 768px and below, hide desktop nav and show hamburger */
+  @media (max-width: 768px) {
+    .nav-links {
+      display: none;
+    }
+    .hamburger-menu {
+      display: block;
+    }
+  }
   
   /* For tablets and smaller screens */
 @media (max-width: 768px) {

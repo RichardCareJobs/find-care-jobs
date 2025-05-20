@@ -46,7 +46,6 @@ document.addEventListener('DOMContentLoaded', init);
   // Avoid re-binding if already done
   if (menuBtn && mobileNav && !menuBtn.hasListener) {
     menuBtn.addEventListener('click', () => {
-      console.log('Hamburger clicked');
       mobileNav.classList.toggle('active');
     });
     menuBtn.hasListener = true; // Prevent duplicate binding
