@@ -87,7 +87,7 @@ function updateSponsoredJobs(jobListings, sponsoredJobs, desiredCount = 100) {
       ...job,
       Sponsored: 'true',
       Category: randomCategory,
-      scrapeDate: new Date().toISOString().split('T')[0],
+      scrapeDate: new Date().toISOString().split('T')[0]
       sponsorDate: new Date().toISOString().split('T')[0]
     });
   }
