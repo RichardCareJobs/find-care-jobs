@@ -456,7 +456,7 @@ header nav a:hover {
     padding: 20px; /* Add more padding to create space */
     background-color: #F5F5F5; /* Light background for sponsored jobs */
     position: relative;
-    margin: 0 auto 16px; /* Add some space between job cards */
+    margin: 10px; /* Add some space between job cards */
 }
 
 /* Employer logo positioning (top right) */
@@ -575,16 +575,12 @@ header nav a:hover {
     gap: 20px; /* Space between image and text */
 }
 
-.image-placeholder {
-    flex: 0 0 300px; /* Fixed width for the image container */
-    margin-bottom: 1rem;
-}
-
 img {
   max-width: 100%;
   height: auto;
   display: block;
 }
+
 
 
 .text-content {
@@ -777,86 +773,12 @@ body[data-sector="Disability Support"] #job-listings .see-all-link {
 
 
 main.content {
-  padding-top: 50px; /* or adjust based on header height */
-}
-
-main {
-  padding-top: 50px; /* Matches or exceeds header height */
+  padding-top: 100px; /* or adjust based on header height */
 }
 
 .advice-wrapper {
   max-width: 800px;
   margin: 0 auto;
   padding: 0 1rem; /* keeps it clean on mobile */
-}
-
-.content-container {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 20px;
-}
-
-.image-column,
-.text-column {
-  flex: 1 1 100%;
-}
-
-@media (min-width: 768px) {
-  .image-column,
-  .text-column {
-    flex: 1 1 50%;
-  }
-}
-
-.content-container {
-  padding: 16px;
-}
-
-.text-column p {
-  margin-bottom: 1em;
-}
-
-h1 {
-  font-size: var(--font-size-h1); /* Already defined as 32px */
-}
-h2 {
-  font-size: 1.5rem;
-}
-
-
-@media (max-width: 480px) {
-  h1 {
-    font-size: 1.5rem;
-  }
-  h2 {
-    font-size: 1.2rem;
-  }
-}
-
-@media (max-width: 768px) {
-  .image-column {
-    margin-bottom: 1rem;
-  }
-
-  .content-container {
-    flex-direction: column;
-    padding: 12px;
-  }
-}
-
-@media (max-width: 768px) {
-  body[data-sector="Aged Care"] #job-listings,
-  body[data-sector="Disability Support"] #job-listings {
-    padding: 0 12px; /* Adds spacing around cards */
-    grid-template-columns: 1fr;
-  }
-}
-
-body[data-sector="Aged Care"] #job-listings .job-cards,
-body[data-sector="Disability Support"] #job-listings .job-cards {
-  max-width: 600px;
-  width: 100%;
-  margin: 0 auto 16px;  /* Add bottom spacing between cards */
-  box-sizing: border-box;
 }
 

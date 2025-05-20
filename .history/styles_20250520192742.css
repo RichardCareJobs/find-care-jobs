@@ -456,7 +456,7 @@ header nav a:hover {
     padding: 20px; /* Add more padding to create space */
     background-color: #F5F5F5; /* Light background for sponsored jobs */
     position: relative;
-    margin: 0 auto 16px; /* Add some space between job cards */
+    margin: 10px; /* Add some space between job cards */
 }
 
 /* Employer logo positioning (top right) */
@@ -843,20 +843,3 @@ h2 {
     padding: 12px;
   }
 }
-
-@media (max-width: 768px) {
-  body[data-sector="Aged Care"] #job-listings,
-  body[data-sector="Disability Support"] #job-listings {
-    padding: 0 12px; /* Adds spacing around cards */
-    grid-template-columns: 1fr;
-  }
-}
-
-body[data-sector="Aged Care"] #job-listings .job-cards,
-body[data-sector="Disability Support"] #job-listings .job-cards {
-  max-width: 600px;
-  width: 100%;
-  margin: 0 auto 16px;  /* Add bottom spacing between cards */
-  box-sizing: border-box;
-}
-
