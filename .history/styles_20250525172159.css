@@ -6,12 +6,7 @@ body {
     color: #333; /* Dark text color for good contrast */
 }
 
-/* Header styles */
-header {
-    background-color: #fff; /* White background for the entire header */
-    padding: 20px;
-    border-bottom: 2px solid #A8E6CF; /* Light Mint border at the bottom */
-}
+
 
 .hero-overlay h1,
 .hero-overlay h2,
@@ -21,6 +16,46 @@ header {
   color: #fff;
 }
 
+/* ——— Header override to match Home page ——— */
+header.header-container {
+    position: fixed;
+    top: 0; left: 0; width: 100vw;
+    height: 80px;                 /* ↑ bigger bar like Home */
+    padding: 10px 40px;           /* ↑ vertical + horizontal spacing */
+    background-color: var(--primary-color);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    z-index: 1000;
+    box-sizing: border-box;
+  }
+  
+  /* Logo link must be white, not teal */
+  .header-container .logo a {
+    color: #fff;
+    text-decoration: none;
+    font-size: 1.2rem;
+    font-weight: bold;
+  }
+
+  .logo {
+  display: flex;
+  align-items: center;
+}
+.logo a {
+  display: inline-block;
+}
+
+  
+  /* Nav links stay white on teal */
+  .header-container .nav-links a {
+    color: #fff;
+  }
+  
+  .header-container .nav-links a:hover {
+    color: var(--accent-color);
+  }
+  
 
 /* New unified header container */
 .header-container {
@@ -28,7 +63,7 @@ header {
     justify-content: space-between; /* Logo on left, nav/hamburger on right */
     align-items: center;
     padding: 0 20px;
-    height: 60px; /* Adjust height as needed */
+    height: 80px; /* Adjust height as needed */
     background-color: #4E8A8B; /* Muted Teal for the header background */
     box-sizing: border-box;
     position: fixed; /* Keep header visible on scroll */
@@ -62,42 +97,61 @@ header {
   }
   
   /* Hamburger menu icon – hidden on desktop */
-  .hamburger-menu {
-    display: none; /* Show only on mobile */
-    color: #fff;
-    font-size: 24px;
-    cursor: pointer;
-  }
-  
-  /* Mobile navigation menu – hidden by default */
-  .mobile-nav {
+.hamburger-menu {
+  display: none;
+  color: #fff;
+  font-size: 28px;
+  cursor: pointer;
+  z-index: 10001; /* Ensure it's clickable above menu */
+}
+
+/* Mobile navigation menu – hidden by default */
+.mobile-nav {
+  display: none;
+  flex-direction: column;
+  background-color: #4E8A8B;
+  position: fixed;
+  top: 80px; /* Height of fixed header */
+  left: 0;
+  width: 100%;
+  padding: 10px 0;
+  box-sizing: border-box;
+  z-index: 10000; /* Just below hamburger but above rest of page */
+}
+
+/* Show mobile menu when .active is applied */
+.mobile-nav.active {
+  display: flex !important;
+}
+
+/* Style for mobile nav links */
+.mobile-nav a {
+  color: #fff;
+  padding: 12px 20px;
+  text-decoration: none;
+  border-bottom: 1px solid #fff;
+  font-size: 16px;
+}
+
+/* Media query: On screens 768px and below */
+@media (max-width: 768px) {
+  .nav-links {
     display: none;
-    flex-direction: column;
-    background-color: #4E8A8B;
-    position: absolute;
-    top: 60px; /* Immediately below the header */
-    left: 0;
-    width: 100%;
-    box-sizing: border-box;
-    z-index: 2000; /* Ensures mobile menu appears above other content */
   }
-  
-  .mobile-nav a {
-    color: #fff;
-    padding: 10px 20px;
-    text-decoration: none;
-    border-bottom: 1px solid #fff;
+
+  .hamburger-menu {
+    display: block;
   }
-  
-  /* Media query: On screens 768px and below, hide desktop nav and show hamburger */
-  @media (max-width: 768px) {
-    .nav-links {
-      display: none;
-    }
-    .hamburger-menu {
-      display: block;
-    }
-  }
+}
+
+.job-cards {
+  max-width: 600px;
+  width: 100%;
+  box-sizing: border-box;
+  margin: 0 auto 16px;
+}
+
+
   
   /* For tablets and smaller screens */
 @media (max-width: 768px) {
@@ -360,7 +414,7 @@ header nav a:hover {
 /* Styling for the "Read More" buttons */
 .job-cards .read-more {
     padding: 10px 20px;
-    border-radius: 8px; /* Rounded corners */
+    border-radius: 0px; /* Rounded corners */
     background-color: #A8E6CF; /* Light Mint background */
     border: 2px solid #A8E6CF; /* Light Mint border */
     color: #fff;
@@ -377,13 +431,40 @@ header nav a:hover {
     border-color: #FF6F61; /* Change the border color on hover */
 }
 
+/* Streamline job cards */
+.job-listings-container {
+    gap: 10px;              /* was 20px – bring cards closer together */
+  }
+  
+  .job-cards {
+    padding: 12px;          /* was 20px – less “air” inside each card */
+    border-radius: 0px;     /* optional: slightly tighter corners */
+  }
+  
+  .job-cards h3 {
+    margin-top: 8px;        /* was 1rem – bring title closer to top badge/logo */
+    margin-bottom: 8px;     /* was default – tighten space before body text */
+  }
+  
+  .job-cards p {
+    margin-bottom: 5px;     /* was 1em – less space under each paragraph */
+  }
+  
+  .job-cards .read-more {
+    padding: 6px 12px;      /* was 10px 20px – smaller button */
+    font-size: 0.9rem;      /* slightly smaller text */
+    margin-top: 8px;        /* was 10px – reduce gap above button */
+  }
+  
+
+
 /* Base styles for sponsored jobs */
 .job-cards.sponsored {
     border: 3px solid #FF6F61; /* Thicker border for sponsored jobs */
     padding: 20px; /* Add more padding to create space */
     background-color: #F5F5F5; /* Light background for sponsored jobs */
     position: relative;
-    margin: 10px; /* Add some space between job cards */
+    margin: 0 auto 16px; /* Add some space between job cards */
 }
 
 /* Employer logo positioning (top right) */
@@ -403,65 +484,63 @@ header nav a:hover {
 
 /* Sponsored job categories */
 .job-cards.sponsored.top-job {
-    border-color: #FF6F61; /* Top Job with coral border */
+    border-color: #2196F3; /* Top Job with coral border */
 }
 
 .job-cards.sponsored.featured-job {
-    border-color: #FFD700; /* Featured Job with gold border */
+    border-color: #FFC107; /* Featured Job with gold border */
 }
 
 .job-cards.sponsored.urgent-job {
-    border-color: #FF4500; /* Urgent Job with orange-red border */
+    border-color: #F44336; /* Urgent Job with orange-red border */
 }
 
 .job-cards.sponsored.popular-job {
-    border-color: #32CD32; /* Popular Job with lime green border */
+    border-color: #4CAF50; /* Popular Job with lime green border */
 }
 
-/* Badge for Sponsored Jobs */
+
 .job-cards.sponsored .badge {
-    position: absolute;
-    top: 10px;
-    left: 10px;
-    background-color: #FF6F61; /* Soft Coral for badge background */
-    color: #fff;
-    padding: 8px 12px; /* Add more padding for the badge */
-    border-radius: 10px; /* Make badge more rounded */
-    font-weight: bold;
-    font-size: 16px; /* Increase font size for better visibility */
+  position: relative;
+  top: 10px;
+  left: 10px;
+
+  /* allow text to show */
+  display: inline-block;
+  padding: 4px 8px;
+  min-width: 40px;
+  height: auto;      /* remove the fixed height */
+  background-color: #FF6F61; /* Soft Coral for badge background */
+  color: #fff;
+  font-size: 0.75rem;
+  border-radius: 3px;
+  text-transform: uppercase;
+  white-space: nowrap;
 }
+
+/* category-specific overrides */
+.job-cards.sponsored.top-job .badge       { background: #FF6F61; }
+.job-cards.sponsored.featured-job .badge { background: #FFD700; }
+.job-cards.sponsored.urgent-job .badge   { background: #E60000; }
+.job-cards.sponsored.popular-job .badge  { background: #00B300; }
+
 
 /* Styling for the badge */
 .job-cards.sponsored.top-job .badge {
-    background-color: #FF6F61; /* Top Job Badge */
+    background-color: #2196F3; /* Top Job Badge */
 }
 
 .job-cards.sponsored.featured-job .badge {
-    background-color: #FFD700; /* Featured Job Badge */
+    background-color: #FFC107; /* Featured Job Badge */
 }
 
 .job-cards.sponsored.urgent-job .badge {
-    background-color: #FF4500; /* Urgent Job Badge */
+    background-color: #F44336; /* Urgent Job Badge */
 }
 
 .job-cards.sponsored.popular-job .badge {
-    background-color: #32CD32; /* Popular Job Badge */
+    background-color: #4CAF50; /* Popular Job Badge */
 }
-
-
-
-/* Badge for Sponsored Jobs */
-.job-cards.sponsored .badge {
-    position: absolute;
-    top: 10px;
-    left: 10px;
-    background-color: #FF6F61; /* Soft Coral for badge background */
-    color: #fff;
-    padding: 5px 10px;
-    border-radius: 5px;
-    font-weight: bold;
-}
-
 
 
 .global-footer {
@@ -506,15 +585,15 @@ header nav a:hover {
 
 .image-placeholder {
     flex: 0 0 300px; /* Fixed width for the image container */
+    margin-bottom: 1rem;
 }
 
-.image-placeholder img {
-    width: 100%; /* Image takes full width of its container */
-    height: auto;
-    border-radius: 5px; /* Optional rounded corners */
-    padding: 5px; /* Padding around the image for spacing */
-    background-color: #f0f0f0; /* Optional: background color for the image */
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
 }
+
 
 .text-content {
     flex: 1; /* Take remaining space */
@@ -535,6 +614,22 @@ header nav a:hover {
     --font-size-base: 16px;
     --font-size-small: 14px;
 }
+
+header.header-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;             /* span the entire viewport */
+    height: var(--header-height);
+    background-color: var(--primary-color);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 20px;          /* no vertical padding, just left/right */
+    z-index: 1000;
+    box-sizing: border-box;
+  }
+  
 
 /* Apply global font and color styles */
 html {
@@ -602,5 +697,247 @@ button:hover {
     background-color: var(--accent-color);
 }
 
+/* ——— General See-All button styling ——— */
+.see-all-button {
+  display: inline-block;
+  padding: 0.6rem 1.2rem;
+  background-color: #0088d2;    /* or your brand primary */
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  font-size: 1rem;
+  cursor: pointer;
+  text-align: center;
+  margin: 1rem 0;
+}
+
+/* ——— Center & Span full width on just those sector pages ——— */
+body[data-sector="Aged Care"]   #job-listings .see-all-button,
+body[data-sector="Disability Support"] #job-listings .see-all-button {
+  grid-column: 1 / -1;      /* span both columns */
+  justify-self: center;     /* then center within that span */
+}
 
 
+
+/* ——— Sector Page 2×2 Grid for Top 4 Sponsored Jobs ——— */
+body[data-sector="Aged Care"] #job-listings,
+body[data-sector="Disability Support"] #job-listings {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  grid-auto-rows: auto;
+  gap: 1rem;
+}
+
+body[data-sector="Aged Care"] #job-listings .see-all-link,
+body[data-sector="Disability Support"] #job-listings .see-all-link {
+  grid-column: 1 / -1;
+  text-align: center;
+  margin-top: 1rem;
+  font-weight: bold;
+}
+
+.advice-listing {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding: 1rem 0;
+}
+
+.advice-card {
+  background-color: #ffffff;
+  border: 2px solid #A8E6CF; /* Match your job card style */
+  border-radius: 10px;
+  padding: 1rem;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+
+.advice-card h2 {
+  margin-top: 0;
+  font-size: 1.1rem;
+}
+
+.advice-date {
+  font-size: 0.85rem;
+  color: #666;
+  margin-bottom: 0.5rem;
+}
+
+.advice-card p {
+  margin-bottom: 0.5rem;
+  line-height: 1.5;
+}
+
+.advice-card .read-more {
+  display: inline-block;
+  margin-top: 0.5rem;
+  background-color: #A8E6CF;
+  color: #000;
+  padding: 0.4rem 0.8rem;
+  font-size: 0.9rem;
+  border-radius: 4px;
+  text-decoration: none;
+}
+
+.advice-card .read-more:hover {
+  background-color: #7bd1b9;
+}
+
+
+main.content {
+  padding-top: 50px; /* or adjust based on header height */
+}
+
+main {
+  padding-top: 50px; /* Matches or exceeds header height */
+}
+
+.advice-wrapper {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 0 1rem; /* keeps it clean on mobile */
+}
+
+.content-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+/* Mobile default: stack */
+.image-column,
+.text-column {
+  flex: 1 1 100%;
+}
+
+/* Desktop: image left, text right */
+@media (min-width: 768px) {
+  .image-column {
+    flex: 0 0 400px;  /* fixed width for image column */
+  }
+
+  .text-column {
+    flex: 1;
+  }
+
+  .content-container {
+    align-items: flex-start;
+  }
+}
+
+
+.image-column,
+.text-column {
+  flex: 1 1 100%;
+}
+
+@media (min-width: 768px) {
+  .image-column,
+  .text-column {
+    flex: 1 1 50%;
+  }
+}
+
+.content-container {
+  padding: 16px;
+}
+
+.text-column p {
+  margin-bottom: 1em;
+}
+
+h1 {
+  font-size: var(--font-size-h1); /* Already defined as 32px */
+}
+h2 {
+  font-size: 1.5rem;
+}
+
+
+@media (max-width: 480px) {
+  h1 {
+    font-size: 1.5rem;
+  }
+  h2 {
+    font-size: 1.2rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .image-column {
+    margin-bottom: 1rem;
+  }
+
+  .content-container {
+    flex-direction: column;
+    padding: 12px;
+  }
+}
+
+@media (max-width: 768px) {
+  body[data-sector="Aged Care"] #job-listings,
+  body[data-sector="Disability Support"] #job-listings {
+    padding: 0 12px; /* Adds spacing around cards */
+    grid-template-columns: 1fr;
+  }
+}
+
+body[data-sector="Aged Care"] #job-listings .job-cards,
+body[data-sector="Disability Support"] #job-listings .job-cards {
+  max-width: 600px;
+  width: 100%;
+  margin: 0 auto 16px;  /* Add bottom spacing between cards */
+  box-sizing: border-box;
+}
+
+@media (min-width: 768px) {
+  .image-placeholder img {
+    max-width: 100%;
+    width: 100%;
+    height: auto;
+  }
+
+  .image-column {
+    max-width: 400px; /* Set a max width */
+    flex: 1 1 40%;     /* Optional: reduce width ratio on desktop */
+  }
+
+  .text-column {
+    flex: 1 1 60%;
+  }
+}
+
+/* Ensure headings span full width */
+.full-width-heading {
+  width: 100%;
+  margin-bottom: 1.5rem;
+}
+
+/* Side-by-side image and copy container */
+.two-column-section {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  align-items: flex-start;
+}
+
+/* Image on left, text on right (desktop) */
+.image-column {
+  flex: 0 0 400px;
+}
+
+.text-column {
+  flex: 1;
+}
+
+/* Stack layout for mobile */
+@media (max-width: 768px) {
+  .two-column-section {
+    flex-direction: column;
+  }
+
+  .image-column,
+  .text-column {
+    flex: 1 1 100%;
+  }
+}

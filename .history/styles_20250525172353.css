@@ -1,0 +1,340 @@
+/* Root-level variables */
+:root {
+  --primary-color: #4E8A8B;
+  --accent-color: #FF6F61;
+  --text-color: #333333;
+  --background-color: #F1E2C6;
+  --font-family: Arial, sans-serif;
+  --font-size-h1: 32px;
+  --font-size-large: 24px;
+  --font-size-base: 16px;
+  --font-size-small: 14px;
+}
+
+/* Reset and base styles */
+html, body {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: var(--font-family);
+  font-size: var(--font-size-base);
+  color: var(--text-color);
+  background-color: #ffffff;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+h1 {
+  font-size: var(--font-size-h1);
+  color: var(--primary-color);
+  font-weight: bold;
+}
+
+h2 {
+  font-size: 1.5rem;
+  color: var(--primary-color);
+  font-weight: bold;
+}
+
+h3, h4, h5, h6 {
+  color: var(--primary-color);
+}
+
+p {
+  font-size: var(--font-size-base);
+  line-height: 1.6;
+  margin: 0 0 1em;
+}
+
+a {
+  color: var(--primary-color);
+  text-decoration: none;
+}
+
+a:hover {
+  color: var(--accent-color);
+  text-decoration: underline;
+}
+
+button {
+  font-size: var(--font-size-base);
+  color: #fff;
+  background-color: var(--primary-color);
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: var(--accent-color);
+}
+
+/* Header */
+.header-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 20px;
+  height: 80px;
+  background-color: var(--primary-color);
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 1000;
+  box-sizing: border-box;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  color: #fff;
+  font-size: 1.2rem;
+  font-weight: bold;
+}
+
+.nav-links {
+  display: flex;
+  gap: 20px;
+}
+
+.nav-links a {
+  color: #fff;
+  text-decoration: none;
+  font-size: 16px;
+}
+
+.nav-links a:hover {
+  color: var(--accent-color);
+}
+
+.hamburger-menu {
+  display: none;
+  color: #fff;
+  font-size: 28px;
+  cursor: pointer;
+  z-index: 10001;
+}
+
+.mobile-nav {
+  display: none;
+  flex-direction: column;
+  background-color: var(--primary-color);
+  position: fixed;
+  top: 80px;
+  left: 0;
+  width: 100%;
+  padding: 10px 0;
+  box-sizing: border-box;
+  z-index: 10000;
+}
+
+.mobile-nav.active {
+  display: flex !important;
+}
+
+.mobile-nav a {
+  color: #fff;
+  padding: 12px 20px;
+  text-decoration: none;
+  border-bottom: 1px solid #fff;
+  font-size: 16px;
+}
+
+@media (max-width: 768px) {
+  .nav-links { display: none; }
+  .hamburger-menu { display: block; }
+}
+
+/* Hero Section */
+.hero {
+  position: relative;
+  background-image: url('images/fcj-hero-v1.png');
+  background-size: cover;
+  background-position: center;
+  height: 500px;
+  width: 100vw;
+  margin-left: calc(-50vw + 50%);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.hero-overlay {
+  background: rgba(0, 0, 0, 0.5);
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  text-align: center;
+}
+
+.hero .search-bar {
+  margin-top: 20px;
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+}
+
+.hero .search-bar input[type="text"],
+.search-bar input[type="text"] {
+  padding: 10px;
+  border-radius: 8px;
+  border: 2px solid #A8E6CF;
+  font-size: 16px;
+  width: 200px;
+  max-width: 300px;
+}
+
+.hero .search-bar button,
+.search-bar button {
+  padding: 10px 20px;
+  border-radius: 8px;
+  background-color: #A8E6CF;
+  border: 2px solid #A8E6CF;
+  color: #fff;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.search-bar button:hover {
+  background-color: #FF6F61;
+  border-color: #FF6F61;
+}
+
+/* Job Listings */
+.job-listings-container {
+  margin: 0 auto;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.job-cards {
+  background-color: #fff;
+  padding: 12px;
+  border-radius: 0px;
+  border: 2px solid #A8E6CF;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  text-align: left;
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto 16px;
+  box-sizing: border-box;
+}
+
+.job-cards h3 { margin: 8px 0; }
+.job-cards p { margin-bottom: 5px; }
+
+.job-cards .read-more {
+  padding: 6px 12px;
+  font-size: 0.9rem;
+  margin-top: 8px;
+  background-color: #A8E6CF;
+  border: 2px solid #A8E6CF;
+  color: #fff;
+  cursor: pointer;
+}
+
+.job-cards .read-more:hover {
+  background-color: #FF6F61;
+  border-color: #FF6F61;
+}
+
+/* Sponsored job styles */
+.job-cards.sponsored {
+  border: 3px solid #FF6F61;
+  background-color: #F5F5F5;
+  position: relative;
+}
+
+.job-cards.sponsored .badge {
+  position: relative;
+  top: 10px;
+  left: 10px;
+  display: inline-block;
+  padding: 4px 8px;
+  background-color: #FF6F61;
+  color: #fff;
+  font-size: 0.75rem;
+  border-radius: 3px;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.job-cards.sponsored.top-job { border-color: #2196F3; }
+.job-cards.sponsored.featured-job { border-color: #FFC107; }
+.job-cards.sponsored.urgent-job { border-color: #F44336; }
+.job-cards.sponsored.popular-job { border-color: #4CAF50; }
+
+.job-cards.sponsored.top-job .badge { background-color: #2196F3; }
+.job-cards.sponsored.featured-job .badge { background-color: #FFC107; }
+.job-cards.sponsored.urgent-job .badge { background-color: #F44336; }
+.job-cards.sponsored.popular-job .badge { background-color: #4CAF50; }
+
+/* Footer */
+.global-footer {
+  background-color: #4E8A8B;
+  color: white;
+  padding: 20px;
+  text-align: center;
+  width: 100vw;
+  position: relative;
+  left: 50%;
+  transform: translateX(-50%);
+  box-sizing: border-box;
+}
+
+.global-footer nav {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+}
+
+.global-footer a {
+  color: white;
+  text-decoration: none;
+  font-size: 16px;
+}
+
+.global-footer a:hover {
+  color: #FF6F61;
+}
+
+/* Responsive content layout */
+.content-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  padding: 16px;
+}
+
+.image-column,
+.text-column {
+  flex: 1 1 100%;
+}
+
+@media (min-width: 768px) {
+  .image-column { flex: 0 0 400px; }
+  .text-column { flex: 1; }
+  .content-container { align-items: flex-start; }
+  .image-placeholder img { width: 100%; height: auto; }
+}
+
+@media (max-width: 480px) {
+  h1 { font-size: 1.5rem; }
+  h2 { font-size: 1.2rem; }
+}
