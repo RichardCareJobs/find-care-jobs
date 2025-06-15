@@ -947,3 +947,55 @@ body[data-sector="Disability Support"] #job-listings .job-cards {
   margin: 0 auto;
   padding: 0 16px;
 }
+
+.intro-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+/* Adjust blog card layout for image on the right */
+.blog-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 1rem;
+  border: 1px solid #a8e6cf;
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+  background: white;
+}
+
+.blog-content {
+  flex: 1;
+  margin-right: 1rem;
+}
+
+.blog-thumbnail {
+  width: 150px;
+  flex-shrink: 0;
+}
+
+.blog-thumbnail img {
+  width: 100%;
+  height: auto;
+  border-radius: 4px;
+  object-fit: cover;
+}
+
+@media (max-width: 768px) {
+  .blog-card {
+    flex-direction: column;
+  }
+
+  .blog-thumbnail {
+    width: 100%;
+    margin-top: 1rem;
+    text-align: center;
+  }
+
+  .blog-thumbnail img {
+    max-width: 300px;
+  }
+}
+
